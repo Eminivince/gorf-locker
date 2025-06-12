@@ -1,55 +1,63 @@
-# React + TypeScript + Vite
+# Abstract Locker UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web interface for the Abstract Locker protocol, a decentralized token locking and vesting platform built on Abstract Chain. This application allows users to securely lock and manage their tokens with various vesting schedules.
 
-Currently, two official plugins are available:
+## 🌟 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Token Locking**: Lock any ERC20 token with customizable lock periods
+- **LP Token Support**: Lock liquidity pool (LP) tokens from various DEX versions (V2, V3, V4)
+- **Vesting Schedules**: Create custom vesting schedules with:
+  - Token Generation Event (TGE) percentage
+  - Cycle-based unlocks
+  - Customizable vesting periods
+- **Lock Management**:
+  - View all active locks
+  - Monitor lock status and unlock times
+  - Transfer lock ownership
+  - Unlock tokens when vesting period ends
+- **Multiple Fee Structures**: Support for different fee types:
+  - Token-based fees
+  - LP token fees
+  - Custom fee structures
 
-## Expanding the ESLint configuration
+## 🛠️ Technical Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend Framework**: React 19 with TypeScript
+- **Web3 Integration**:
+  - wagmi for Ethereum interactions
+  - viem for low-level blockchain operations
+- **UI/UX**:
+  - Tailwind CSS for styling
+  - Lucide React for icons
+  - Recharts for data visualization
+- **Build Tools**:
+  - Vite 6 for fast development and building
+  - ESLint for code quality
+  - TypeScript for type safety
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 🚀 Getting Started
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. **Prerequisites**:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+   - Node.js (Latest LTS version)
+   - Yarn package manager
+   - MetaMask or compatible Web3 wallet
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
-# gorf-locker
+2. **Installation**:
+
+   ```bash
+   yarn install
+   ```
+
+3. **Development**:
+
+   ```bash
+   yarn dev
+   ```
+
+   The application will be available at `http://localhost:5173`
+
+4. **Building for Production**:
+   ```bash
+   yarn build
+   ```
