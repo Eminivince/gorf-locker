@@ -10,8 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@abstract-foundation/agw-client": "^1.8.5",
+    "@abstract-foundation/agw-react": "^1.8.5",
+    "@privy-io/cross-app-connect": "^0.2.1",
+    "@privy-io/react-auth": "^2.14.1",
     "@tailwindcss/vite": "^4.1.10",
-    "@tanstack/react-query": "^5.80.6",
+    "@tanstack/react-query": "^5.80.7",
     "@types/react-router-dom": "^5.3.3",
     "lucide-react": "^0.514.0",
     "react": "^19.1.0",
@@ -19,7 +23,7 @@
     "react-router-dom": "^7.6.2",
     "recharts": "^2.15.3",
     "tailwindcss": "^4.1.10",
-    "viem": "^2.31.0",
+    "viem": "2.x",
     "wagmi": "^2.15.6"
   },
   "devDependencies": {

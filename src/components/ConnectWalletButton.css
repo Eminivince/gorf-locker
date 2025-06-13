@@ -51,45 +51,114 @@
   background: #1a1a1a;
   border: 1px solid #333;
   border-radius: 8px;
-  min-width: 200px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 8px 0;
+  min-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: 1000;
-  overflow: hidden;
 }
 
 .wallet-dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   padding: 12px 16px;
   background: none;
   border: none;
   color: #fff;
-  text-align: left;
+  font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-size: 14px;
+  text-align: left;
 }
 
 .wallet-dropdown-item:hover {
-  background: #333;
+  background: #2a2a2a;
+}
+
+.wallet-dropdown-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .wallet-address {
-  font-family: "Courier New", monospace;
+  font-family: monospace;
   font-size: 12px;
   color: #888;
-  word-break: break-all;
 }
 
 .disconnect-btn {
   color: #ff6b6b !important;
-  border-top: 1px solid #333;
 }
 
 .disconnect-btn:hover {
   background: rgba(255, 107, 107, 0.1) !important;
 }
 
-.connector-btn {
-  font-weight: 500;
+.connector-btn:hover {
+  background: rgba(0, 255, 136, 0.1) !important;
+}
+
+/* Wallet Mode Selector Styles */
+.wallet-mode-section {
+  position: relative;
+}
+
+.mode-selector-btn {
+  justify-content: space-between;
+  border-bottom: 1px solid #333;
+  margin-bottom: 8px;
+  padding-bottom: 12px !important;
+}
+
+.mode-selector-btn:hover {
+  background: #2a2a2a !important;
+}
+
+.mode-options {
+  background: #0f0f0f;
+  border: 1px solid #444;
+  border-radius: 6px;
+  margin: 8px 16px;
+  overflow: hidden;
+}
+
+.mode-option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.mode-option:last-child {
+  border-bottom: none;
+}
+
+.mode-option:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.mode-option.active {
+  background: rgba(0, 255, 136, 0.1);
+  color: #00ff88;
+  font-weight: 600;
+}
+
+.wallet-divider {
+  height: 1px;
+  background: #333;
+  margin: 8px 0;
+}
+
+/* Wallet icons */
+.connector-btn span {
+  font-size: 16px;
 }

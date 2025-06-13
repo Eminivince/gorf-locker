@@ -1,17 +1,23 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { Wallet, ChevronDown } from "lucide-react";
+import { Wallet, ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
 import "./ConnectWalletButton.css";
+import { useLoginWithAbstract } from "@abstract-foundation/agw-react";
+import { useWalletMode } from "../App";
 
 export const ConnectWalletButton = () => {
   const { address, isConnected } = useAccount();
   const { connectors, connect, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showModeSelector, setShowModeSelector] = useState(false);
+  const { login } = useLoginWithAbstract();
+  const { useAbstractWallet, setUseAbstractWallet } = useWalletMode();
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
+
 
   if (isConnected && address) {
     return (
@@ -73,18 +79,71 @@ export const ConnectWalletButton = () => {
 
       {showDropdown && (
         <div className="wallet-dropdown">
-          {connectors.map((connector) => (
+          {/* Wallet Mode Selector */}
+          <div className="wallet-mode-section">
             <button
-              key={connector.uid}
+              className="wallet-dropdown-item mode-selector-btn"
+              onClick={() => setShowModeSelector(!showModeSelector)}>
+              <Settings size={16} />
+              <span>
+                Wallet Mode: {useAbstractWallet ? "Abstract GW" : "Standard"}
+              </span>
+              <ChevronDown size={16} />
+            </button>
+
+            {showModeSelector && (
+              <div className="mode-options">
+                <button
+                  className={`mode-option ${
+                    !useAbstractWallet ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setUseAbstractWallet(false);
+                    setShowModeSelector(false);
+                  }}>
+                  Standard Mode (MetaMask, WalletConnect, etc.)
+                </button>
+                <button
+                  className={`mode-option ${useAbstractWallet ? "active" : ""}`}
+                  onClick={() => {
+                    setUseAbstractWallet(true);
+                    setShowModeSelector(false);
+                  }}>
+                  Abstract Wallet Mode
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="wallet-divider"></div>
+
+          {/* Wallet Connectors */}
+          {useAbstractWallet ? (
+            // Abstract Wallet Mode
+            <button
               className="wallet-dropdown-item connector-btn"
               onClick={() => {
-                connect({ connector });
+                login();
                 setShowDropdown(false);
               }}
               disabled={isPending}>
-              {connector.name}
+              Connect with Abstract Wallet
             </button>
-          ))}
+          ) : (
+            // Standard Wallet Mode
+            connectors.map((connector) => (
+              <button
+                key={connector.uid}
+                className="wallet-dropdown-item connector-btn"
+                onClick={() => {
+                  connect({ connector });
+                  setShowDropdown(false);
+                }}
+                disabled={isPending}>
+                {connector.name}
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>
