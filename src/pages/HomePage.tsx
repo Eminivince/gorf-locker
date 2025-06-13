@@ -112,7 +112,7 @@ export const HomePage = () => {
                     secure
                   </span>
                   <br />
-                  your toke on{" "}
+                  your token on{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
                     Abstract.
                   </span>{" "}
