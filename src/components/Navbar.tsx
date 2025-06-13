@@ -21,6 +21,7 @@ export const Navbar = () => {
     { path: "/", label: "Explorer" },
     { path: "/my-locks", label: "My Locks" },
     { path: "/create-lock", label: "Create New Lock", isSpecial: true },
+    { path: "/how-to-use", label: "How to Use" },
   ];
 
   return (

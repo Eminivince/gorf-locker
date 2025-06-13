@@ -7,6 +7,7 @@ import { HomePage } from "./pages/HomePage";
 import { MyLocksPage } from "./pages/MyLocksPage";
 import { CreateLockPage } from "./pages/CreateLockPage";
 import { DocsPage } from "./pages/DocsPage";
+import { HowToUsePage } from "./pages/HowToUsePage";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/my-locks" element={<MyLocksPage />} />
                 <Route path="/create-lock" element={<CreateLockPage />} />
+                <Route path="/how-to-use" element={<HowToUsePage />} />
                 <Route path="/docs" element={<DocsPage />} />
               </Routes>
             </main>
