@@ -6,6 +6,7 @@ import {
 import { parseUnits, maxUint256 } from "viem";
 import type { Address } from "viem";
 import TokenLockerContract from "../contracts/TokenLocker.json";
+import { useWalletMode } from "../App";
 
 // Standard ERC20 ABI for approve and allowance functions
 const ERC20_ABI = [
@@ -64,9 +65,32 @@ export const useTokenApproval = (
   userAddress?: Address
 ) => {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { useAbstractWallet } = useWalletMode();
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+
+  // Helper function to handle amount conversion based on wallet type
+  const convertApprovalAmount = (amount: string, decimals: number) => {
+    const normalAmount = parseUnits(amount, decimals);
+
+    if (useAbstractWallet) {
+      // AGW seems to be adding 12 extra zeros to the amount
+      // We need to compensate by dividing by 10^12
+      const adjustedAmount = normalAmount / BigInt(10 ** 12);
+
+      console.log("AGW Approval Amount Conversion:", {
+        originalAmount: amount,
+        normalAmount: normalAmount.toString(),
+        adjustedAmount: adjustedAmount.toString(),
+      });
+
+      return adjustedAmount;
+    } else {
+      // Standard wallets work correctly with parseUnits
+      return normalAmount;
+    }
+  };
 
   // Check current allowance
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
@@ -111,7 +135,7 @@ export const useTokenApproval = (
     if (!tokenAddress || !decimals) return;
 
     const amountToApprove =
-      amount === "max" ? maxUint256 : parseUnits(amount, decimals);
+      amount === "max" ? maxUint256 : convertApprovalAmount(amount, decimals);
 
     return writeContract({
       address: tokenAddress,
@@ -124,7 +148,7 @@ export const useTokenApproval = (
   const checkApproval = (requiredAmount: string): boolean => {
     if (!allowance || !decimals) return false;
 
-    const required = parseUnits(requiredAmount, decimals);
+    const required = convertApprovalAmount(requiredAmount, decimals);
     return allowance >= required;
   };
 

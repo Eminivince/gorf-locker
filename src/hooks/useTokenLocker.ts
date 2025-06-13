@@ -8,6 +8,7 @@ import { parseEther, parseUnits } from "viem";
 import type { Address } from "viem";
 import TokenLockerContract from "../contracts/TokenLocker.json";
 import { useMemo } from "react";
+import { useWalletMode } from "../App";
 
 export interface LockParams {
   token: Address;
@@ -55,7 +56,6 @@ const useLockInfo = (lockId: bigint | undefined) => {
 
     try {
       // Log the raw data for debugging
-
 
       // Handle different possible data structures
       let lock: {
@@ -200,9 +200,34 @@ export const useWithdrawableTokens = (lockId: string | undefined) => {
 export const useTokenLocker = () => {
   const { address } = useAccount();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { useAbstractWallet } = useWalletMode();
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+
+  // Helper function to handle amount conversion based on wallet type
+  const convertAmount = (amount: string, decimals: number = 18) => {
+    const normalAmount = parseUnits(amount, decimals);
+
+    if (useAbstractWallet) {
+      // AGW seems to be adding 12 extra zeros to the amount
+      // This is a known issue with some wallet providers
+      // We need to compensate by dividing by 10^12
+      const adjustedAmount = normalAmount / BigInt(10 ** 12);
+
+      console.log("AGW Amount Conversion:", {
+        originalAmount: amount,
+        normalAmount: normalAmount.toString(),
+        adjustedAmount: adjustedAmount.toString(),
+        difference: (normalAmount / adjustedAmount).toString(),
+      });
+
+      return adjustedAmount;
+    } else {
+      // Standard wallets work correctly with parseUnits
+      return normalAmount;
+    }
+  };
 
   // Get lock IDs for normal locks
   const { data: normalLockIds, refetch: refetchNormalLockIds } =
@@ -239,25 +264,30 @@ export const useTokenLocker = () => {
 
   // Function to refresh all lock data
   const refreshLockData = async () => {
-
     await Promise.all([
       refetchNormalLockIds(),
       refetchLpLockIds(),
       refetchTotalLocks(),
     ]);
-
   };
 
   // Write functions
   const createNormalLock = async (params: LockParams) => {
     if (!address) throw new Error("Wallet not connected");
 
-    const amount = parseUnits(params.amount, params.decimals || 18);
+    const amount = convertAmount(params.amount, params.decimals || 18);
     const value =
       params.feeType === "TOKEN"
         ? parseEther("0.000001")
         : parseEther("0.000001");
     // params.feeType === "TOKEN" ? parseEther("0.02") : parseEther("0.01");
+
+    console.log("Creating lock with:", {
+      walletType: useAbstractWallet ? "AGW" : "Standard",
+      originalAmount: params.amount,
+      convertedAmount: amount.toString(),
+      decimals: params.decimals || 18,
+    });
 
     return writeContract({
       address: TokenLockerContract.address as Address,
@@ -277,12 +307,19 @@ export const useTokenLocker = () => {
   const createVestingLock = async (params: VestingLockParams) => {
     if (!address) throw new Error("Wallet not connected");
 
-    const amount = parseUnits(params.amount, params.decimals || 18);
+    const amount = convertAmount(params.amount, params.decimals || 18);
     const value =
       params.feeType === "TOKEN"
         ? parseEther("0.000001")
         : parseEther("0.000001");
-      // params.feeType === "TOKEN" ? parseEther("0.02") : parseEther("0.01");
+    // params.feeType === "TOKEN" ? parseEther("0.02") : parseEther("0.01");
+
+    console.log("Creating vesting lock with:", {
+      walletType: useAbstractWallet ? "AGW" : "Standard",
+      originalAmount: params.amount,
+      convertedAmount: amount.toString(),
+      decimals: params.decimals || 18,
+    });
 
     // Create the VestingLockParams struct
     const vestingParams = {
@@ -309,8 +346,6 @@ export const useTokenLocker = () => {
 
   const unlockTokens = async (lockId: string) => {
     try {
-      
-
       if (!address) {
         throw new Error("Wallet not connected");
       }
@@ -321,7 +356,6 @@ export const useTokenLocker = () => {
         functionName: "unlock",
         args: [BigInt(lockId)],
       });
-
 
       return result;
     } catch (error) {
