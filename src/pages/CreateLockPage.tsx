@@ -9,7 +9,6 @@ import type { Address } from "viem";
 import { ConnectWalletButton } from "../components/ConnectWalletButton";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { StatusModal } from "../components/StatusModal";
-import { AGWDebugger } from "../components/AGWDebugger";
 
 interface LockOption {
   id: string;
@@ -1567,9 +1566,6 @@ export const CreateLockPage: React.FC = () => {
       <h1 className="text-2xl sm:text-4xl font-bold text-white mb-6 sm:mb-10 text-center">
         Create New Lock
       </h1>
-
-      {/* AGW Debugger */}
-      <AGWDebugger />
       <div className="flex flex-col gap-4 sm:gap-8">
         {lockOptions.map((option) => (
           <button
