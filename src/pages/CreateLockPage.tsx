@@ -98,11 +98,6 @@ export const CreateLockPage: React.FC = () => {
     address
   );
 
-  // Format address for display
-  const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-6)}`;
-  };
-
   // Format date for datetime-local input (YYYY-MM-DDTHH:MM)
   const formatDateTimeLocal = (dateString: string) => {
     if (!dateString) return "";
@@ -550,7 +545,7 @@ export const CreateLockPage: React.FC = () => {
   };
 
   const TokenLockForm = () => (
-    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+    <div className="max-w-4xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <button
           className="text-gray-400 hover:text-white mb-4 md:mb-0"
@@ -558,12 +553,6 @@ export const CreateLockPage: React.FC = () => {
           ← Back to Options
         </button>
         <h1 className="text-2xl font-bold text-white">Create New Lock</h1>
-        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-          <span className="text-white font-medium text-sm">
-            {address ? formatAddress(address) : "Not Connected"}
-          </span>
-        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
@@ -576,7 +565,23 @@ export const CreateLockPage: React.FC = () => {
           <div>
             <label className="block text-gray-300 mb-1">Chain</label>
             <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-4 py-2">
-              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              <div className="mr-2 text-green-400 bg-black rounded-full p-1">
+                <svg
+                  viewBox="0 0 24 22"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="18">
+                  <path
+                    d="M15.821 14.984L20.642 19.759L18.38 21.999L13.56 17.225C13.146 16.815 12.602 16.592 12.015 16.592C11.429 16.592 10.884 16.815 10.471 17.225L5.651 21.999L3.389 19.759L8.209 14.984H15.818H15.821Z"
+                    fill="currentColor"></path>
+                  <path
+                    d="M16.626 13.608L23.209 15.353L24.036 12.29L17.453 10.545C16.889 10.396 16.42 10.038 16.127 9.536C15.834 9.037 15.758 8.453 15.909 7.895L17.671 1.374L14.579 0.556L12.816 7.076L16.623 13.604L16.626 13.608Z"
+                    fill="currentColor"></path>
+                  <path
+                    d="M7.409 13.608L0.827 15.353L0 12.29L6.583 10.545C7.146 10.396 7.616 10.038 7.909 9.536C8.202 9.037 8.277 8.453 8.127 7.895L6.365 1.374L9.457 0.556L11.219 7.076L7.413 13.604L7.409 13.608Z"
+                    fill="currentColor"></path>
+                </svg>
+              </div>
               <span className="text-white">Abstract</span>
             </div>
           </div>
@@ -809,7 +814,7 @@ export const CreateLockPage: React.FC = () => {
   );
 
   const UniV2LiquidityForm = () => (
-    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+    <div className="max-w-4xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <button
           className="text-gray-400 hover:text-white mb-4 md:mb-0"
@@ -819,12 +824,6 @@ export const CreateLockPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-white">
           Create UniV2 Liquidity Lock
         </h1>
-        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-          <span className="text-white font-medium text-sm">
-            {address ? formatAddress(address) : "Not Connected"}
-          </span>
-        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
@@ -1032,51 +1031,108 @@ export const CreateLockPage: React.FC = () => {
               </div>
             </>
           )}
-          <div className="form-group">
-            <label>Fee Structures</label>
-            <div className="fee-structures-grid">
+          <div className="space-y-4">
+            <label className="block text-gray-300 text-sm font-medium">
+              Fee Structures
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "default" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "default"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("default")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">Default</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-amount">0.02 ETH</span>
+                {selectedFeeStructure === "default" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">
+                    Default
+                  </h3>
+                  <div className="text-green-400 font-bold text-xl">
+                    0.000001 ETH
+                  </div>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Standard fee structure
+                  </p>
                 </div>
               </div>
 
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "pay-with-lp" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "pay-with-lp"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("pay-with-lp")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">Pay with LP</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "pay-with-lp" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">
+                    Pay with LP
+                  </h3>
+                  <div className="text-blue-400 font-bold text-xl">0.6%</div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will directly extract 0.6% of the liquidity as fee.
-                  </span>
+                  </p>
                 </div>
               </div>
 
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "pay-with-eth-lp" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "pay-with-eth-lp"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("pay-with-eth-lp")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">
-                    Pay with ETH and LP
-                  </span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "pay-with-eth-lp" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">
+                    ETH + LP
+                  </h3>
+                  <div className="text-purple-400 font-bold text-lg">
+                    0.01 ETH + 0.3%
+                  </div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will charge 0.01 ETH and extract 0.3% of LP as fee.
-                  </span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -1102,7 +1158,7 @@ export const CreateLockPage: React.FC = () => {
   );
 
   const UniV3LiquidityForm = () => (
-    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+    <div className="max-w-4xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <button
           className="text-gray-400 hover:text-white mb-4 md:mb-0"
@@ -1112,12 +1168,6 @@ export const CreateLockPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-white">
           Create UniV3 Liquidity Lock
         </h1>
-        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-          <span className="text-white font-medium text-sm">
-            {address ? formatAddress(address) : "Not Connected"}
-          </span>
-        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
@@ -1187,54 +1237,103 @@ export const CreateLockPage: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="form-group">
-            <label>Fee Structures</label>
-            <div className="fee-structures-grid">
+          <div className="space-y-4">
+            <label className="block text-gray-300 text-sm font-medium">
+              Fee Structures
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "default" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "default"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("default")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">Default</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "default" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">
+                    Default
+                  </h3>
+                  <div className="text-green-400 font-bold text-xl">0.4%</div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will extract 0.4% the liquidity as fee, and 1.6%
                     Liquidity Stake Earnings each time you collect it.
-                  </span>
+                  </p>
                 </div>
               </div>
 
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "lvp" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "lvp"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("lvp")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">LVP</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "lvp" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">LVP</h3>
+                  <div className="text-blue-400 font-bold text-xl">0.64%</div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will extract 0.64% the liquidity as fee, and 0.8%
                     Liquidity Stake Earnings each time you collect it.
-                  </span>
+                  </p>
                 </div>
               </div>
 
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "llp" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "llp"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("llp")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">LLP</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "llp" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">LLP</h3>
+                  <div className="text-purple-400 font-bold text-xl">0.24%</div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will extract 0.24% the liquidity as fee, and 2.8%
                     Liquidity Stake Earnings each time you collect it.
-                  </span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -1260,7 +1359,7 @@ export const CreateLockPage: React.FC = () => {
   );
 
   const UniV4LiquidityForm = () => (
-    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+    <div className="max-w-4xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <button
           className="text-gray-400 hover:text-white mb-4 md:mb-0"
@@ -1270,12 +1369,6 @@ export const CreateLockPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-white">
           Create UniV4 Liquidity Lock
         </h1>
-        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-          <span className="text-white font-medium text-sm">
-            {address ? formatAddress(address) : "Not Connected"}
-          </span>
-        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
@@ -1345,54 +1438,105 @@ export const CreateLockPage: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="form-group">
-            <label>Fee Structures</label>
-            <div className="fee-structures-grid">
+          <div className="space-y-4">
+            <label className="block text-gray-300 text-sm font-medium">
+              Fee Structures
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "default" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "default"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("default")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">Default</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "default" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">
+                    Default
+                  </h3>
+                  <div className="text-green-400 font-bold text-lg">
+                    0.4% + 0.05 ETH
+                  </div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will extract 0.4% the liquidity and 0.05 ETH as fee, and
                     1.6% Liquidity Stake Earnings each time you collect it.
-                  </span>
+                  </p>
                 </div>
               </div>
 
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "lvp" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "lvp"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("lvp")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">LVP</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "lvp" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">LVP</h3>
+                  <div className="text-blue-400 font-bold text-xl">0.64%</div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will extract 0.64% the liquidity as fee, and 0.8%
                     Liquidity Stake Earnings each time you collect it.
-                  </span>
+                  </p>
                 </div>
               </div>
 
               <div
-                className={`fee-structure-card ${
-                  selectedFeeStructure === "llp" ? "selected" : ""
+                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedFeeStructure === "llp"
+                    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20"
+                    : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
                 }`}
                 onClick={() => handleFeeStructureSelect("llp")}>
-                <div className="fee-structure-header">
-                  <span className="fee-structure-title">LLP</span>
-                </div>
-                <div className="fee-structure-content">
-                  <span className="fee-description">
+                {selectedFeeStructure === "llp" && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg mb-2">LLP</h3>
+                  <div className="text-purple-400 font-bold text-xl">0.24%</div>
+                  <p className="text-gray-400 text-sm mt-2">
                     We will extract 0.24% the liquidity as fee, and 2.8%
                     Liquidity Stake Earnings each time you collect it.
-                  </span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -1528,7 +1672,7 @@ export const CreateLockPage: React.FC = () => {
   if (selectedLockType) {
     return (
       <div className="min-h-screen bg-gray-900 p-4">
-        <div className="max-w-2xl mx-auto">
+        <div className="w-full mx-auto">
           <div className="token-lock-form-container">
             {selectedLockType === "token" && <TokenLockForm />}
             {selectedLockType === "univ2" && <UniV2LiquidityForm />}

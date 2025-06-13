@@ -167,12 +167,6 @@ export const MyLocksPage = () => {
     <div className="my-locks-page">
       <div className="page-header">
         <h1>My Locks</h1>
-        <div className="account-info">
-          <div className="account-badge">
-            <div className="account-avatar"></div>
-            <span>{formatAddress(address!)}</span>
-          </div>
-        </div>
       </div>
 
       <div className="locks-stats">
