@@ -106,7 +106,7 @@ export const Navbar = () => {
 
         {/* Menu Content */}
         <div
-          className={`relative bg-gray-900 h-full transform transition-all duration-300 ease-in-out ${
+          className={`relative bg-gray-900 h-[70%] transform transition-all duration-300 ease-in-out ${
             isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}>
           <div className="px-6 py-8 h-full flex flex-col">
