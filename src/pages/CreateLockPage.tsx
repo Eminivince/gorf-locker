@@ -9,7 +9,6 @@ import type { Address } from "viem";
 import { ConnectWalletButton } from "../components/ConnectWalletButton";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { StatusModal } from "../components/StatusModal";
-import "./CreateLockPage.css";
 
 interface LockOption {
   id: string;
@@ -32,15 +31,15 @@ const lockOptions: LockOption[] = [
     id: "univ2",
     title: "Lock UniV2 Liquidity",
     description:
-      "Create UniV2 Liquidity lock, including UniV2, PancakeV2, SushiV2, and other dex contracts developed based on UniV2. Supports full locking or TGE (Token Generation Event) cycle release mode, with",
+      "Create UniV2 Liquidity lock. Supports full locking or TGE (Token Generation Event) cycle release mode, with",
     icon: "V2",
-    additionalInfo: "multiple fee structures available.",
+    additionalInfo: "Multiple fee structures available.",
   },
   {
     id: "univ3",
     title: "Lock UniV3 Liquidity",
     description:
-      "Create UniV3 Liquidity lock, including UniV3, PancakeV3, SushiV3, and other dex contracts developed based on UniV3. Supports multiple fee structures.",
+      "Create UniV3 Liquidity lock. Supports multiple fee structures.",
     icon: "V3",
     isHot: true,
     additionalInfo:
@@ -551,64 +550,38 @@ export const CreateLockPage: React.FC = () => {
   };
 
   const TokenLockForm = () => (
-    <div className="token-lock-form-container">
-      <div className="page-header">
-        <div className="header-left">
-          <button className="back-button" onClick={handleBackToOptions}>
-            ← Back to Options
-          </button>
-          <h1>Create New Lock</h1>
-        </div>
-        <div className="account-selector">
-          <div className="account-badge">
-            <div className="account-avatar"></div>
-            <span>{address ? formatAddress(address) : "Not Connected"}</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M3 4.5L6 7.5L9 4.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <button
+          className="text-gray-400 hover:text-white mb-4 md:mb-0"
+          onClick={handleBackToOptions}>
+          ← Back to Options
+        </button>
+        <h1 className="text-2xl font-bold text-white">Create New Lock</h1>
+        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span className="text-white font-medium text-sm">
+            {address ? formatAddress(address) : "Not Connected"}
+          </span>
         </div>
       </div>
-
-      <div className="token-lock-form-card">
-        <div className="form-visual">
-          <div className="lock-visual-container">
-            <div className="lock-3d-icon">
-              <Lock size={60} />
-            </div>
-            <div className="lock-glow"></div>
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
+          <div className="bg-gradient-to-br from-gray-700 to-gray-900 rounded-xl p-6 shadow-lg flex items-center justify-center">
+            <Lock size={60} className="text-green-400" />
           </div>
-          <h2>New Token Lock</h2>
+          <h2 className="text-xl font-semibold text-white">New Token Lock</h2>
         </div>
-
-        <div className="form-content">
-          <div className="form-group">
-            <label>Chain</label>
-            <div className="chain-selector">
-              <div className="chain-badge">
-                <div className="chain-icon"></div>
-                <span>Abstract</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M3 4.5L6 7.5L9 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+        <form className="flex-1 space-y-6">
+          <div>
+            <label className="block text-gray-300 mb-1">Chain</label>
+            <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-4 py-2">
+              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              <span className="text-white">Abstract</span>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>Token Address</label>
+          <div>
+            <label className="block text-gray-300 mb-1">Token Address</label>
             <input
               type="text"
               placeholder="0x..."
@@ -616,108 +589,126 @@ export const CreateLockPage: React.FC = () => {
               onChange={(e) =>
                 handleInputChange("tokenAddress", e.target.value)
               }
-              className={`form-input ${errors.tokenAddress ? "error" : ""}`}
+              className={`w-full px-4 py-2 rounded-md border ${
+                errors.tokenAddress ? "border-red-500" : "border-gray-700"
+              } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
             />
             {errors.tokenAddress && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.tokenAddress}
               </div>
             )}
             {formData.tokenAddress &&
               isAddress(formData.tokenAddress) &&
               tokenApproval.symbol && (
-                <div className="token-info">
-                  <CheckCircle size={16} />
+                <div className="flex items-center text-green-400 mt-1 text-sm">
+                  <CheckCircle size={16} className="mr-1" />
                   <span>
                     {tokenApproval.name} ({tokenApproval.symbol})
                   </span>
-                  <span className="balance">
+                  <span className="ml-2 text-gray-400">
                     Balance:{" "}
                     {formatUnits(tokenApproval.balance, tokenApproval.decimals)}
                   </span>
                 </div>
               )}
           </div>
-
-          <div className="form-group">
-            <label>Amount</label>
-            <div className="amount-input-group">
+          <div>
+            <label className="block text-gray-300 mb-1">Amount</label>
+            <div className="flex items-center">
               <input
                 type="text"
                 placeholder="Input number"
                 value={formData.amount}
                 onChange={(e) => handleInputChange("amount", e.target.value)}
-                className={`form-input ${errors.amount ? "error" : ""}`}
+                className={`w-full px-4 py-2 rounded-md border ${
+                  errors.amount ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
               />
-              <button className="max-button" onClick={handleMaxClick}>
+              <button
+                type="button"
+                className="ml-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                onClick={handleMaxClick}>
                 Max
               </button>
             </div>
             {errors.amount && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.amount}
               </div>
             )}
           </div>
-
-          <div className="form-group">
-            <label className="toggle-label">
-              <span>TGE (Token Generation Event) cycle release mode</span>
-              <div className="toggle-switch" onClick={handleTGEToggle}>
-                <div
-                  className={`toggle-slider ${
-                    isTGEEnabled ? "active" : ""
-                  }`}></div>
-              </div>
+          <div>
+            <label className="block text-gray-300 mb-1">
+              TGE (Token Generation Event) cycle release mode
             </label>
+            <div className="flex items-center">
+              <span className="mr-2">Enable</span>
+              <button
+                type="button"
+                onClick={handleTGEToggle}
+                className={`w-10 h-6 flex items-center bg-gray-700 rounded-full p-1 duration-300 ease-in-out ${
+                  isTGEEnabled ? "bg-green-500" : ""
+                }`}>
+                {" "}
+                <span
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+                    isTGEEnabled ? "translate-x-4" : ""
+                  }`}></span>{" "}
+              </button>
+            </div>
           </div>
-
           {!isTGEEnabled ? (
-            <div className="form-group">
-              <label>Unlock Time (UTC)</label>
-              <div className="datetime-input">
-                <input
-                  type="datetime-local"
-                  value={formatDateTimeLocal(formData.unlockTime)}
-                  onChange={(e) =>
-                    handleDateTimeChange("unlockTime", e.target.value)
-                  }
-                  className={`form-input ${errors.unlockTime ? "error" : ""}`}
-                />
-              </div>
+            <div>
+              <label className="block text-gray-300 mb-1">
+                Unlock Time (UTC)
+              </label>
+              <input
+                type="datetime-local"
+                value={formatDateTimeLocal(formData.unlockTime)}
+                onChange={(e) =>
+                  handleDateTimeChange("unlockTime", e.target.value)
+                }
+                className={`w-full px-4 py-2 rounded-md border ${
+                  errors.unlockTime ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
+              />
               {errors.unlockTime && (
-                <div className="error-message">
-                  <AlertCircle size={16} />
+                <div className="flex items-center text-red-500 mt-1 text-sm">
+                  <AlertCircle size={16} className="mr-1" />
                   {errors.unlockTime}
                 </div>
               )}
             </div>
           ) : (
             <>
-              <div className="form-group">
-                <label>TGE Time (UTC)</label>
-                <div className="datetime-input">
-                  <input
-                    type="datetime-local"
-                    value={formatDateTimeLocal(formData.tgeTime)}
-                    onChange={(e) =>
-                      handleDateTimeChange("tgeTime", e.target.value)
-                    }
-                    className={`form-input ${errors.tgeTime ? "error" : ""}`}
-                  />
-                </div>
+              <div>
+                <label className="block text-gray-300 mb-1">
+                  TGE Time (UTC)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formatDateTimeLocal(formData.tgeTime)}
+                  onChange={(e) =>
+                    handleDateTimeChange("tgeTime", e.target.value)
+                  }
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.tgeTime ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
+                />
                 {errors.tgeTime && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.tgeTime}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>TGE Percentage (%)</label>
+              <div>
+                <label className="block text-gray-300 mb-1">
+                  TGE Percentage (%)
+                </label>
                 <input
                   type="number"
                   placeholder="Input number, 10 is for 10%"
@@ -728,20 +719,19 @@ export const CreateLockPage: React.FC = () => {
                   onChange={(e) =>
                     handleInputChange("tgePercentage", e.target.value)
                   }
-                  className={`form-input ${
-                    errors.tgePercentage ? "error" : ""
-                  }`}
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.tgePercentage ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
                 />
                 {errors.tgePercentage && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.tgePercentage}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>Cycle (day)</label>
+              <div>
+                <label className="block text-gray-300 mb-1">Cycle (day)</label>
                 <input
                   type="number"
                   placeholder="Input number, 10 is for 10 days"
@@ -749,18 +739,21 @@ export const CreateLockPage: React.FC = () => {
                   step="1"
                   value={formData.cycle}
                   onChange={(e) => handleInputChange("cycle", e.target.value)}
-                  className={`form-input ${errors.cycle ? "error" : ""}`}
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.cycle ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
                 />
                 {errors.cycle && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.cycle}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>Cycle Percentage (%)</label>
+              <div>
+                <label className="block text-gray-300 mb-1">
+                  Cycle Percentage (%)
+                </label>
                 <input
                   type="number"
                   placeholder="Input number, 10 is for 10%"
@@ -771,51 +764,29 @@ export const CreateLockPage: React.FC = () => {
                   onChange={(e) =>
                     handleInputChange("cyclePercentage", e.target.value)
                   }
-                  className={`form-input ${
-                    errors.cyclePercentage ? "error" : ""
-                  }`}
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.cyclePercentage
+                      ? "border-red-500"
+                      : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
                 />
                 {errors.cyclePercentage && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.cyclePercentage}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>Final Unlock Time (UTC)</label>
-                <div className="datetime-input">
-                  <input
-                    type="datetime-local"
-                    value={formatDateTimeLocal(formData.unlockTime)}
-                    onChange={(e) =>
-                      handleDateTimeChange("unlockTime", e.target.value)
-                    }
-                    className={`form-input ${errors.unlockTime ? "error" : ""}`}
-                  />
-                </div>
-                {errors.unlockTime && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
-                    {errors.unlockTime}
-                  </div>
-                )}
-                <div className="field-hint">
-                  This is when the vesting schedule ends and all remaining
-                  tokens are unlocked
-                </div>
+              <div className="text-gray-400 text-xs mt-1">
+                This is when the vesting schedule ends and all remaining tokens
+                are unlocked
               </div>
             </>
           )}
-
           <button
-            className="approve-button"
-            onClick={(e) => {
-              e.preventDefault();
-
-              handleApprove();
-            }}
+            type="button"
+            className="w-full mt-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition disabled:opacity-50"
+            onClick={handleApprove}
             disabled={
               !isFormValid() ||
               tokenApproval.isPending ||
@@ -832,161 +803,161 @@ export const CreateLockPage: React.FC = () => {
               ? "Approve"
               : "Create Lock"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
 
   const UniV2LiquidityForm = () => (
-    <div className="token-lock-form-container">
-      <div className="page-header">
-        <div className="header-left">
-          <button className="back-button" onClick={handleBackToOptions}>
-            ← Back to Options
-          </button>
-          <h1>Create UniV2 Liquidity Lock</h1>
-        </div>
-        <div className="account-selector">
-          <div className="account-badge">
-            <div className="account-avatar"></div>
-            <span>{address ? formatAddress(address) : "Not Connected"}</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M3 4.5L6 7.5L9 4.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <button
+          className="text-gray-400 hover:text-white mb-4 md:mb-0"
+          onClick={handleBackToOptions}>
+          ← Back to Options
+        </button>
+        <h1 className="text-2xl font-bold text-white">
+          Create UniV2 Liquidity Lock
+        </h1>
+        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span className="text-white font-medium text-sm">
+            {address ? formatAddress(address) : "Not Connected"}
+          </span>
         </div>
       </div>
-
-      <div className="token-lock-form-card">
-        <div className="form-visual">
-          <div className="lock-visual-container">
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
+          <div className="bg-gradient-to-br from-gray-700 to-gray-900 rounded-xl p-6 shadow-lg flex items-center justify-center">
             <div className="v2-icon-container">
               <div className="v2-icon">V2</div>
             </div>
-            <div className="lock-glow"></div>
           </div>
-          <h2>New V2 liquidity Lock</h2>
+          <h2 className="text-xl font-semibold text-white">
+            New V2 liquidity Lock
+          </h2>
         </div>
-
-        <div className="form-content">
-          <div className="form-group">
-            <label>Chain</label>
-            <div className="chain-selector">
-              <div className="chain-badge">
-                <div className="chain-icon"></div>
-                <span>Abstract</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M3 4.5L6 7.5L9 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+        <form className="flex-1 space-y-6">
+          <div>
+            <label className="block text-gray-300 mb-1">Chain</label>
+            <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-4 py-2">
+              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              <span className="text-white">Abstract</span>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>LP Address</label>
+          <div>
+            <label className="block text-gray-300 mb-1">LP Address</label>
             <input
               type="text"
               placeholder="0x..."
               value={formData.lpAddress}
               onChange={(e) => handleInputChange("lpAddress", e.target.value)}
-              className={`form-input ${errors.lpAddress ? "error" : ""}`}
+              className={`w-full px-4 py-2 rounded-md border ${
+                errors.lpAddress ? "border-red-500" : "border-gray-700"
+              } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
             />
             {errors.lpAddress && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.lpAddress}
               </div>
             )}
           </div>
-
-          <div className="form-group">
-            <label>Amount</label>
-            <div className="amount-input-group">
+          <div>
+            <label className="block text-gray-300 mb-1">Amount</label>
+            <div className="flex items-center">
               <input
                 type="text"
                 placeholder="Input number"
                 value={formData.amount}
                 onChange={(e) => handleInputChange("amount", e.target.value)}
-                className={`form-input ${errors.amount ? "error" : ""}`}
+                className={`w-full px-4 py-2 rounded-md border ${
+                  errors.amount ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
               />
-              <button className="max-button">Max</button>
+              <button
+                type="button"
+                className="ml-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                onClick={handleMaxClick}>
+                Max
+              </button>
             </div>
             {errors.amount && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.amount}
               </div>
             )}
           </div>
-
-          <div className="form-group">
-            <label className="toggle-label">
-              <span>TGE (Token Generation Event) cycle release mode</span>
-              <div className="toggle-switch" onClick={handleTGEToggle}>
-                <div
-                  className={`toggle-slider ${
-                    isTGEEnabled ? "active" : ""
-                  }`}></div>
-              </div>
+          <div>
+            <label className="block text-gray-300 mb-1">
+              TGE (Token Generation Event) cycle release mode
             </label>
+            <div className="flex items-center">
+              <span className="mr-2">Enable</span>
+              <button
+                type="button"
+                onClick={handleTGEToggle}
+                className={`w-10 h-6 flex items-center bg-gray-700 rounded-full p-1 duration-300 ease-in-out ${
+                  isTGEEnabled ? "bg-green-500" : ""
+                }`}>
+                {" "}
+                <span
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+                    isTGEEnabled ? "translate-x-4" : ""
+                  }`}></span>{" "}
+              </button>
+            </div>
           </div>
-
           {!isTGEEnabled ? (
-            <div className="form-group">
-              <label>Unlock Time (UTC)</label>
-              <div className="datetime-input">
-                <input
-                  type="datetime-local"
-                  value={formatDateTimeLocal(formData.unlockTime)}
-                  onChange={(e) =>
-                    handleDateTimeChange("unlockTime", e.target.value)
-                  }
-                  className={`form-input ${errors.unlockTime ? "error" : ""}`}
-                />
-              </div>
+            <div>
+              <label className="block text-gray-300 mb-1">
+                Unlock Time (UTC)
+              </label>
+              <input
+                type="datetime-local"
+                value={formatDateTimeLocal(formData.unlockTime)}
+                onChange={(e) =>
+                  handleDateTimeChange("unlockTime", e.target.value)
+                }
+                className={`w-full px-4 py-2 rounded-md border ${
+                  errors.unlockTime ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
+              />
               {errors.unlockTime && (
-                <div className="error-message">
-                  <AlertCircle size={16} />
+                <div className="flex items-center text-red-500 mt-1 text-sm">
+                  <AlertCircle size={16} className="mr-1" />
                   {errors.unlockTime}
                 </div>
               )}
             </div>
           ) : (
             <>
-              <div className="form-group">
-                <label>TGE Time (UTC)</label>
-                <div className="datetime-input">
-                  <input
-                    type="datetime-local"
-                    value={formatDateTimeLocal(formData.tgeTime)}
-                    onChange={(e) =>
-                      handleDateTimeChange("tgeTime", e.target.value)
-                    }
-                    className={`form-input ${errors.tgeTime ? "error" : ""}`}
-                  />
-                </div>
+              <div>
+                <label className="block text-gray-300 mb-1">
+                  TGE Time (UTC)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formatDateTimeLocal(formData.tgeTime)}
+                  onChange={(e) =>
+                    handleDateTimeChange("tgeTime", e.target.value)
+                  }
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.tgeTime ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
+                />
                 {errors.tgeTime && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.tgeTime}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>TGE Percentage (%)</label>
+              <div>
+                <label className="block text-gray-300 mb-1">
+                  TGE Percentage (%)
+                </label>
                 <input
                   type="number"
                   placeholder="Input number, 10 is for 10%"
@@ -997,20 +968,19 @@ export const CreateLockPage: React.FC = () => {
                   onChange={(e) =>
                     handleInputChange("tgePercentage", e.target.value)
                   }
-                  className={`form-input ${
-                    errors.tgePercentage ? "error" : ""
-                  }`}
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.tgePercentage ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
                 />
                 {errors.tgePercentage && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.tgePercentage}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>Cycle (day)</label>
+              <div>
+                <label className="block text-gray-300 mb-1">Cycle (day)</label>
                 <input
                   type="number"
                   placeholder="Input number, 10 is for 10 days"
@@ -1018,18 +988,21 @@ export const CreateLockPage: React.FC = () => {
                   step="1"
                   value={formData.cycle}
                   onChange={(e) => handleInputChange("cycle", e.target.value)}
-                  className={`form-input ${errors.cycle ? "error" : ""}`}
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.cycle ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
                 />
                 {errors.cycle && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.cycle}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>Cycle Percentage (%)</label>
+              <div>
+                <label className="block text-gray-300 mb-1">
+                  Cycle Percentage (%)
+                </label>
                 <input
                   type="number"
                   placeholder="Input number, 10 is for 10%"
@@ -1040,44 +1013,25 @@ export const CreateLockPage: React.FC = () => {
                   onChange={(e) =>
                     handleInputChange("cyclePercentage", e.target.value)
                   }
-                  className={`form-input ${
-                    errors.cyclePercentage ? "error" : ""
-                  }`}
+                  className={`w-full px-4 py-2 rounded-md border ${
+                    errors.cyclePercentage
+                      ? "border-red-500"
+                      : "border-gray-700"
+                  } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
                 />
                 {errors.cyclePercentage && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
+                  <div className="flex items-center text-red-500 mt-1 text-sm">
+                    <AlertCircle size={16} className="mr-1" />
                     {errors.cyclePercentage}
                   </div>
                 )}
               </div>
-
-              <div className="form-group">
-                <label>Final Unlock Time (UTC)</label>
-                <div className="datetime-input">
-                  <input
-                    type="datetime-local"
-                    value={formatDateTimeLocal(formData.unlockTime)}
-                    onChange={(e) =>
-                      handleDateTimeChange("unlockTime", e.target.value)
-                    }
-                    className={`form-input ${errors.unlockTime ? "error" : ""}`}
-                  />
-                </div>
-                {errors.unlockTime && (
-                  <div className="error-message">
-                    <AlertCircle size={16} />
-                    {errors.unlockTime}
-                  </div>
-                )}
-                <div className="field-hint">
-                  This is when the vesting schedule ends and all remaining
-                  tokens are unlocked
-                </div>
+              <div className="text-gray-400 text-xs mt-1">
+                This is when the vesting schedule ends and all remaining tokens
+                are unlocked
               </div>
             </>
           )}
-
           <div className="form-group">
             <label>Fee Structures</label>
             <div className="fee-structures-grid">
@@ -1127,14 +1081,10 @@ export const CreateLockPage: React.FC = () => {
               </div>
             </div>
           </div>
-
           <button
-            className="approve-button"
-            onClick={(e) => {
-              e.preventDefault();
-
-              handleApprove();
-            }}
+            type="button"
+            className="w-full mt-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition disabled:opacity-50"
+            onClick={handleApprove}
             disabled={
               !isFormValid() ||
               tokenLocker.isPending ||
@@ -1146,127 +1096,97 @@ export const CreateLockPage: React.FC = () => {
               ? "Confirming..."
               : "Create Lock"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
 
   const UniV3LiquidityForm = () => (
-    <div className="token-lock-form-container">
-      <div className="page-header">
-        <div className="header-left">
-          <button className="back-button" onClick={handleBackToOptions}>
-            ← Back to Options
-          </button>
-          <h1>Create UniV3 Liquidity Lock</h1>
-        </div>
-        <div className="account-selector">
-          <div className="account-badge">
-            <div className="account-avatar"></div>
-            <span>{address ? formatAddress(address) : "Not Connected"}</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M3 4.5L6 7.5L9 4.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <button
+          className="text-gray-400 hover:text-white mb-4 md:mb-0"
+          onClick={handleBackToOptions}>
+          ← Back to Options
+        </button>
+        <h1 className="text-2xl font-bold text-white">
+          Create UniV3 Liquidity Lock
+        </h1>
+        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span className="text-white font-medium text-sm">
+            {address ? formatAddress(address) : "Not Connected"}
+          </span>
         </div>
       </div>
-
-      <div className="token-lock-form-card">
-        <div className="form-visual">
-          <div className="lock-visual-container">
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
+          <div className="bg-gradient-to-br from-gray-700 to-gray-900 rounded-xl p-6 shadow-lg flex items-center justify-center">
             <div className="v3-icon-container">
               <div className="v3-icon">V3</div>
             </div>
-            <div className="lock-glow"></div>
           </div>
-          <h2>Create UniV3 Liquidity Lock</h2>
-          <p className="form-subtitle">
+          <h2 className="text-xl font-semibold text-white">
+            Create UniV3 Liquidity Lock
+          </h2>
+          <p className="text-gray-400">
             You can still collect Liquidity Stake Earnings while the liquidity
             is locked.
           </p>
         </div>
-
-        <div className="form-content">
-          <div className="form-group">
-            <label>Chain</label>
-            <div className="chain-selector">
-              <div className="chain-badge">
-                <div className="chain-icon"></div>
-                <span>Abstract</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M3 4.5L6 7.5L9 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+        <form className="flex-1 space-y-6">
+          <div>
+            <label className="block text-gray-300 mb-1">Chain</label>
+            <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-4 py-2">
+              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              <span className="text-white">Abstract</span>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>Select Pool</label>
-            <div className="chain-selector">
-              <div className="chain-badge">
-                <span>ReservoirV3</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M3 4.5L6 7.5L9 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+          <div>
+            <label className="block text-gray-300 mb-1">Select Pool</label>
+            <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-4 py-2">
+              <span className="text-white">ReservoirV3</span>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>NFT ID</label>
+          <div>
+            <label className="block text-gray-300 mb-1">NFT ID</label>
             <input
               type="text"
               placeholder="Input NFT ID"
               value={formData.nftId}
               onChange={(e) => handleInputChange("nftId", e.target.value)}
-              className={`form-input ${errors.nftId ? "error" : ""}`}
+              className={`w-full px-4 py-2 rounded-md border ${
+                errors.nftId ? "border-red-500" : "border-gray-700"
+              } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
             />
             {errors.nftId && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.nftId}
               </div>
             )}
           </div>
-
-          <div className="form-group">
-            <label>Unlock Time (UTC)</label>
-            <div className="datetime-input">
-              <input
-                type="datetime-local"
-                value={formatDateTimeLocal(formData.unlockTime)}
-                onChange={(e) =>
-                  handleDateTimeChange("unlockTime", e.target.value)
-                }
-                className={`form-input ${errors.unlockTime ? "error" : ""}`}
-              />
-            </div>
+          <div>
+            <label className="block text-gray-300 mb-1">
+              Unlock Time (UTC)
+            </label>
+            <input
+              type="datetime-local"
+              value={formatDateTimeLocal(formData.unlockTime)}
+              onChange={(e) =>
+                handleDateTimeChange("unlockTime", e.target.value)
+              }
+              className={`w-full px-4 py-2 rounded-md border ${
+                errors.unlockTime ? "border-red-500" : "border-gray-700"
+              } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
+            />
             {errors.unlockTime && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.unlockTime}
               </div>
             )}
           </div>
-
           <div className="form-group">
             <label>Fee Structures</label>
             <div className="fee-structures-grid">
@@ -1319,14 +1239,10 @@ export const CreateLockPage: React.FC = () => {
               </div>
             </div>
           </div>
-
           <button
-            className="approve-button"
-            onClick={(e) => {
-              e.preventDefault();
-
-              handleApprove();
-            }}
+            type="button"
+            className="w-full mt-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition disabled:opacity-50"
+            onClick={handleApprove}
             disabled={
               !isFormValid() ||
               tokenLocker.isPending ||
@@ -1338,116 +1254,97 @@ export const CreateLockPage: React.FC = () => {
               ? "Confirming..."
               : "Create Lock"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
 
   const UniV4LiquidityForm = () => (
-    <div className="token-lock-form-container">
-      <div className="page-header">
-        <div className="header-left">
-          <button className="back-button" onClick={handleBackToOptions}>
-            ← Back to Options
-          </button>
-          <h1>Create UniV4 Liquidity Lock</h1>
-        </div>
-        <div className="account-selector">
-          <div className="account-badge">
-            <div className="account-avatar"></div>
-            <span>{address ? formatAddress(address) : "Not Connected"}</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M3 4.5L6 7.5L9 4.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+    <div className="max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 mt-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <button
+          className="text-gray-400 hover:text-white mb-4 md:mb-0"
+          onClick={handleBackToOptions}>
+          ← Back to Options
+        </button>
+        <h1 className="text-2xl font-bold text-white">
+          Create UniV4 Liquidity Lock
+        </h1>
+        <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-xl border border-gray-700">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span className="text-white font-medium text-sm">
+            {address ? formatAddress(address) : "Not Connected"}
+          </span>
         </div>
       </div>
-
-      <div className="token-lock-form-card">
-        <div className="form-visual">
-          <div className="lock-visual-container">
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col items-center text-center gap-4 md:w-1/3">
+          <div className="bg-gradient-to-br from-gray-700 to-gray-900 rounded-xl p-6 shadow-lg flex items-center justify-center">
             <div className="v4-icon-container">
               <div className="v4-icon">V4</div>
             </div>
-            <div className="lock-glow"></div>
           </div>
-          <h2>Create UniV4 Liquidity Lock</h2>
-          <p className="form-subtitle">
+          <h2 className="text-xl font-semibold text-white">
+            Create UniV4 Liquidity Lock
+          </h2>
+          <p className="text-gray-400">
             You can still collect Liquidity Stake Earnings while the liquidity
             is locked.
           </p>
         </div>
-
-        <div className="form-content">
-          <div className="form-group">
-            <label>Chain</label>
-            <div className="chain-selector">
-              <div className="chain-badge">
-                <div className="base-chain-icon"></div>
-                <span>Base Chain</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M3 4.5L6 7.5L9 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+        <form className="flex-1 space-y-6">
+          <div>
+            <label className="block text-gray-300 mb-1">Chain</label>
+            <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-4 py-2">
+              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              <span className="text-white">Base Chain</span>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>Select Pool</label>
-            <div className="pool-selector">
-              <span className="pool-text">UniV4</span>
+          <div>
+            <label className="block text-gray-300 mb-1">Select Pool</label>
+            <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-4 py-2">
+              <span className="text-white">UniV4</span>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>NFT ID</label>
+          <div>
+            <label className="block text-gray-300 mb-1">NFT ID</label>
             <input
               type="text"
               placeholder="Input NFT ID"
               value={formData.nftId}
               onChange={(e) => handleInputChange("nftId", e.target.value)}
-              className={`form-input ${errors.nftId ? "error" : ""}`}
+              className={`w-full px-4 py-2 rounded-md border ${
+                errors.nftId ? "border-red-500" : "border-gray-700"
+              } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
             />
             {errors.nftId && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.nftId}
               </div>
             )}
           </div>
-
-          <div className="form-group">
-            <label>Unlock Time (UTC)</label>
-            <div className="datetime-input">
-              <input
-                type="datetime-local"
-                value={formatDateTimeLocal(formData.unlockTime)}
-                onChange={(e) =>
-                  handleDateTimeChange("unlockTime", e.target.value)
-                }
-                className={`form-input ${errors.unlockTime ? "error" : ""}`}
-              />
-            </div>
+          <div>
+            <label className="block text-gray-300 mb-1">
+              Unlock Time (UTC)
+            </label>
+            <input
+              type="datetime-local"
+              value={formatDateTimeLocal(formData.unlockTime)}
+              onChange={(e) =>
+                handleDateTimeChange("unlockTime", e.target.value)
+              }
+              className={`w-full px-4 py-2 rounded-md border ${
+                errors.unlockTime ? "border-red-500" : "border-gray-700"
+              } bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500`}
+            />
             {errors.unlockTime && (
-              <div className="error-message">
-                <AlertCircle size={16} />
+              <div className="flex items-center text-red-500 mt-1 text-sm">
+                <AlertCircle size={16} className="mr-1" />
                 {errors.unlockTime}
               </div>
             )}
           </div>
-
           <div className="form-group">
             <label>Fee Structures</label>
             <div className="fee-structures-grid">
@@ -1500,14 +1397,10 @@ export const CreateLockPage: React.FC = () => {
               </div>
             </div>
           </div>
-
           <button
-            className="approve-button"
-            onClick={(e) => {
-              e.preventDefault();
-
-              handleApprove();
-            }}
+            type="button"
+            className="w-full mt-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition disabled:opacity-50"
+            onClick={handleApprove}
             disabled={
               !isFormValid() ||
               tokenLocker.isPending ||
@@ -1519,47 +1412,55 @@ export const CreateLockPage: React.FC = () => {
               ? "Confirming..."
               : "Create Lock"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
 
   const LockOptionsState = () => (
-    <div className="lock-options-container">
-      <div className="page-header">
-        <h1>Create New Lock</h1>
-        <div className="account-selector"></div>
-      </div>
-
-      <div className="lock-options-grid">
+    <div className="max-w-4xl mx-auto pt-4 sm:pt-8 px-2 sm:px-0">
+      <h1 className="text-2xl sm:text-4xl font-bold text-white mb-6 sm:mb-10 text-center">
+        Create New Lock
+      </h1>
+      <div className="flex flex-col gap-4 sm:gap-8">
         {lockOptions.map((option) => (
-          <div
+          <button
             key={option.id}
-            className="lock-option-card"
-            onClick={() => handleLockOptionClick(option.id)}>
-            {option.isHot && <div className="hot-badge">HOT</div>}
-            <div className="lock-option-content">
-              <div className="lock-option-icon">
-                {option.icon === "🔒" ? (
-                  <Lock size={32} />
-                ) : (
-                  <div className="version-icon">{option.icon}</div>
+            type="button"
+            onClick={() => handleLockOptionClick(option.id)}
+            className="relative flex items-center w-full rounded-xl sm:rounded-2xl px-4 py-5 sm:px-8 sm:py-8 bg-gradient-to-br from-green-500 via-green-400 to-blue-500 shadow-lg hover:scale-[1.01] transition-transform focus:outline-none border-0 active:scale-95">
+            {/* Icon */}
+            <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-24 sm:h-24 rounded-lg sm:rounded-xl bg-white/20 mr-4 sm:mr-8">
+              {option.icon === "🔒" ? (
+                <span className="text-3xl sm:text-6xl">🔒</span>
+              ) : (
+                <span className="text-2xl sm:text-5xl font-bold text-white drop-shadow-lg">
+                  {option.icon}
+                </span>
+              )}
+            </div>
+            {/* Text */}
+            <div className="flex-1 text-left">
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <span className="text-lg sm:text-2xl md:text-3xl font-bold text-white drop-shadow-sm">
+                  {option.title}
+                </span>
+                {option.isHot && (
+                  <span className="absolute top-0 right-0 bg-gradient-to-br from-orange-500 to-red-600 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-tr-xl sm:rounded-tr-2xl rounded-bl-xl sm:rounded-bl-2xl shadow-md">
+                    HOT
+                  </span>
                 )}
               </div>
-              <div className="lock-option-text">
-                <h3>{option.title}</h3>
-                <p>
-                  {option.description}
-                  {option.additionalInfo && (
-                    <span className="additional-info">
-                      {" "}
-                      {option.additionalInfo}
-                    </span>
-                  )}
-                </p>
-              </div>
+              <p className="text-white/90 text-xs sm:text-base md:text-lg leading-snug">
+                {option.description}
+                {option.additionalInfo && (
+                  <span className="block text-black font-semibold mt-1">
+                    {option.additionalInfo}
+                  </span>
+                )}
+              </p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -1594,6 +1495,32 @@ export const CreateLockPage: React.FC = () => {
           </p>
           <ConnectWalletButton />
         </div>
+        {/* Status Modal and LoadingSpinner overlays */}
+        <StatusModal
+          isOpen={statusModal.isOpen}
+          onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+          type={statusModal.type}
+          title={statusModal.title}
+          message={statusModal.message}
+          details={statusModal.details}
+        />
+        {(tokenLocker.isPending ||
+          tokenLocker.isConfirming ||
+          tokenApproval.isPending) && (
+          <LoadingSpinner
+            overlay={true}
+            size="large"
+            text={
+              tokenApproval.isPending
+                ? "Approving token spending..."
+                : tokenLocker.isPending
+                ? "Creating lock..."
+                : tokenLocker.isConfirming
+                ? "Confirming transaction..."
+                : "Processing..."
+            }
+          />
+        )}
       </div>
     );
   }
@@ -1609,15 +1536,40 @@ export const CreateLockPage: React.FC = () => {
             {selectedLockType === "univ4" && <UniV4LiquidityForm />}
           </div>
         </div>
+        {/* Status Modal and LoadingSpinner overlays */}
+        <StatusModal
+          isOpen={statusModal.isOpen}
+          onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+          type={statusModal.type}
+          title={statusModal.title}
+          message={statusModal.message}
+          details={statusModal.details}
+        />
+        {(tokenLocker.isPending ||
+          tokenLocker.isConfirming ||
+          tokenApproval.isPending) && (
+          <LoadingSpinner
+            overlay={true}
+            size="large"
+            text={
+              tokenApproval.isPending
+                ? "Approving token spending..."
+                : tokenLocker.isPending
+                ? "Creating lock..."
+                : tokenLocker.isConfirming
+                ? "Confirming transaction..."
+                : "Processing..."
+            }
+          />
+        )}
       </div>
     );
   }
 
   return (
-    <div className="create-lock-page">
+    <div className="relative min-h-screen bg-gray-950">
       <LockOptionsState />
-
-      {/* Status Modal */}
+      {/* Status Modal and LoadingSpinner overlays */}
       <StatusModal
         isOpen={statusModal.isOpen}
         onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
@@ -1626,8 +1578,6 @@ export const CreateLockPage: React.FC = () => {
         message={statusModal.message}
         details={statusModal.details}
       />
-
-      {/* Loading Overlay */}
       {(tokenLocker.isPending ||
         tokenLocker.isConfirming ||
         tokenApproval.isPending) && (

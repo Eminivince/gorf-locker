@@ -107,15 +107,19 @@ export const HomePage = () => {
             <div className="space-y-8">
               <div className="space-y-4">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                  Lock with the most{" "}
+                  Gorf Token Locker{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
-                    trusted
+                    secure
                   </span>
                   <br />
-                  vesting protocol in DeFi.
+                  your toke on{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
+                    Abstract.
+                  </span>{" "}
+              
                 </h1>
                 <p className="text-xl text-gray-300 max-w-2xl">
-                  Secure your tokens with our battle-tested smart contracts.
+                  Secure your tokens with battle-tested smart contracts.
                   Trusted by thousands of projects for reliable token vesting.
                 </p>
               </div>
@@ -136,8 +140,12 @@ export const HomePage = () => {
 
             <div className="relative flex justify-center lg:justify-end">
               <div className="relative">
-                <div className="w-48 h-48 bg-gradient-to-br from-green-500/20 to-emerald-600/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-green-500/30">
-                  <Lock size={80} className="text-green-400" />
+                <div className="w-64 h-48 bg-gradient-to-br from-green-500/20 to-emerald-600/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-green-500/30">
+                  <img
+                    src="https://www.gorf.life/assets/Logo.svg"
+                    alt="gorf_ogo"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 {/* Floating elements */}
                 <div className="absolute -top-4 -right-4 w-8 h-8 bg-green-400 rounded-full animate-pulse"></div>

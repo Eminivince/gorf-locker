@@ -20,7 +20,13 @@ export const ConnectWalletButton = () => {
           className="connected-wallet-btn"
           onClick={() => setShowDropdown(!showDropdown)}>
           <div className="wallet-info">
-            <div className="wallet-avatar"></div>
+            <div className="wallet-avatar">
+              <img
+                src="https://www.gorf.life/assets/Logo.svg"
+                alt="gorf_logo"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <span>{formatAddress(address)}</span>
           </div>
           <ChevronDown size={16} />

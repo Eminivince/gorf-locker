@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAccount } from "wagmi";
 import { useTokenLocker } from "../hooks/useTokenLocker";
 import { formatUnits } from "viem";
@@ -17,8 +17,6 @@ export const MyLocksPage = () => {
     unlockTokens,
     isPending,
     isConfirmed,
-    normalLockIds,
-    lpLockIds,
     refreshLockData,
   } = useTokenLocker();
 
@@ -38,12 +36,17 @@ export const MyLocksPage = () => {
     message: "",
   });
 
+  // Add a ref to track if unlock success has been handled
+  const unlockHandledRef = useRef(false);
+
   // Define allLocks early so it can be used in useCallback dependencies
   const allLocks = [...userNormalLocks, ...userLpLocks];
 
   // Effect to refresh data when transaction is confirmed
   useEffect(() => {
-    if (isConfirmed) {
+    if (isConfirmed && !unlockHandledRef.current) {
+      unlockHandledRef.current = true; // Mark as handled to prevent recursion
+
       refreshLockData();
       setUnlockingLockId(null); // Clear unlocking state
 
@@ -78,6 +81,7 @@ export const MyLocksPage = () => {
 
   const handleUnlock = async (lockId: string) => {
     try {
+      unlockHandledRef.current = false; // Reset flag for new unlock
       setUnlockingLockId(lockId); // Set loading state for this specific lock
 
       // Check if lock is actually unlockable
@@ -114,6 +118,7 @@ export const MyLocksPage = () => {
     } catch (error) {
       console.error("Failed to unlock:", error);
       setUnlockingLockId(null); // Clear loading state on error
+      unlockHandledRef.current = false; // Reset flag on error
 
       // Show user-friendly error message
       let errorMessage = "Failed to unlock tokens";

@@ -294,23 +294,7 @@
   cursor: not-allowed;
 }
 
-.explorer-btn {
-  background: #333;
-  color: #fff;
-  border: none;
-  padding: 16px 24px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-decoration: none;
-  border: 1px solid #444;
-}
+
 
 .explorer-btn:hover {
   background: #444;
