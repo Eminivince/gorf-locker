@@ -31,8 +31,25 @@ export const Navbar = () => {
         <Link
           to="/"
           className="flex items-center gap-3 text-white no-underline">
-          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
-            <span className="font-bold text-lg text-black">🐸</span>
+          <div className="w-10 h-10 bg-gradient-to-br rounded-lg flex items-center justify-center animate-[swing_3s_ease-in-out_infinite] hover:animate-[shake_0.5s_ease-in-out_infinite]">
+            <style>
+              {`
+                @keyframes swing {
+                  0%, 100% { transform: rotate(-3deg); }
+                  50% { transform: rotate(3deg); }
+                }
+                @keyframes shake {
+                  0%, 100% { transform: translateX(0); }
+                  25% { transform: translateX(-2px); }
+                  75% { transform: translateX(2px); }
+                }
+              `}
+            </style>
+            <img
+              src="https://www.gorf.life/assets/Logo.svg"
+              alt="gorf_ogo"
+              className="object-cover"
+            />
           </div>
           <div className="flex flex-col">
             <span className="text-xl lg:text-2xl font-bold text-white">
@@ -110,6 +127,17 @@ export const Navbar = () => {
             isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}>
           <div className="px-6 py-8 h-full flex flex-col">
+            <div
+              className={`pt-6 border-t border-gray-700 pb-10 transform transition-all duration-300 ease-in-out ${
+                isMobileMenuOpen
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-8 opacity-0"
+              }`}
+              style={{
+                transitionDelay: isMobileMenuOpen ? "300ms" : "0ms",
+              }}>
+              <ConnectWalletButton />
+            </div>
             {/* Navigation Links */}
             <div className="space-y-6 flex-1">
               {navLinks.map((link, index) => (
@@ -135,17 +163,6 @@ export const Navbar = () => {
             </div>
 
             {/* Connect Button at Bottom */}
-            <div
-              className={`pt-6 border-t border-gray-700 transform transition-all duration-300 ease-in-out ${
-                isMobileMenuOpen
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-8 opacity-0"
-              }`}
-              style={{
-                transitionDelay: isMobileMenuOpen ? "300ms" : "0ms",
-              }}>
-              <ConnectWalletButton />
-            </div>
           </div>
         </div>
       </div>

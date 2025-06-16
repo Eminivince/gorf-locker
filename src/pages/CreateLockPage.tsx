@@ -3,6 +3,9 @@ import { Lock, AlertCircle, CheckCircle } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useTokenLocker } from "../hooks/useTokenLocker";
 import { useTokenApproval } from "../hooks/useTokenApproval";
+import { useUniV3NFT } from "../hooks/useUniV3NFT";
+import { useUniv3LPLocker } from "../hooks/useUniv3LPLocker";
+// import { useTokenPairInfo } from "../hooks/useTokenInfo";
 import { formatUnits, parseUnits, isAddress } from "viem";
 import type { Address } from "viem";
 
@@ -45,16 +48,6 @@ const lockOptions: LockOption[] = [
     additionalInfo:
       "You can still collect liquidity stake earnings while the liquidity is locked.",
   },
-  {
-    id: "univ4",
-    title: "Lock UniV4 Liquidity",
-    description:
-      "Create UniV4 Liquidity lock. Supports multiple fee structures.",
-    icon: "V4",
-    isHot: true,
-    additionalInfo:
-      "You can still collect liquidity stake earnings while the liquidity is locked.",
-  },
 ];
 
 export const CreateLockPage: React.FC = () => {
@@ -91,12 +84,34 @@ export const CreateLockPage: React.FC = () => {
 
   // Contract hooks
   const tokenLocker = useTokenLocker();
+  const univ3LPLocker = useUniv3LPLocker();
+
   const tokenApproval = useTokenApproval(
     formData.tokenAddress && isAddress(formData.tokenAddress)
       ? (formData.tokenAddress as Address)
       : undefined,
     address
   );
+
+  // Add LP token approval hook
+  const lpTokenApproval = useTokenApproval(
+    formData.lpAddress && isAddress(formData.lpAddress)
+      ? (formData.lpAddress as Address)
+      : undefined,
+    address
+  );
+
+  // Add UniV3 NFT hook
+  const uniV3NFT = useUniV3NFT(
+    formData.nftId && formData.nftId.trim() !== "" ? formData.nftId : undefined,
+    address
+  );
+
+  // Get token pair info for UniV3 position
+  // const tokenPairInfo = useTokenPairInfo(
+  //   uniV3NFT.position?.token0,
+  //   uniV3NFT.position?.token1
+  // );
 
   // Format date for datetime-local input (YYYY-MM-DDTHH:MM)
   const formatDateTimeLocal = (dateString: string) => {
@@ -130,7 +145,15 @@ export const CreateLockPage: React.FC = () => {
   // Validation effects
   useEffect(() => {
     validateForm();
-  }, [formData, tokenApproval.balance, tokenApproval.decimals]);
+  }, [
+    formData,
+    tokenApproval.balance,
+    tokenApproval.decimals,
+    lpTokenApproval.balance,
+    lpTokenApproval.decimals,
+    uniV3NFT.isOwner,
+    uniV3NFT.hasLiquidity,
+  ]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -152,6 +175,11 @@ export const CreateLockPage: React.FC = () => {
           tokenApproval.balance === BigInt(0)
         ) {
           newErrors[addressField] = "You don't own this token";
+        } else if (
+          selectedLockType === "univ2" &&
+          lpTokenApproval.balance === BigInt(0)
+        ) {
+          newErrors[addressField] = "You don't own this LP token";
         }
       }
 
@@ -166,10 +194,16 @@ export const CreateLockPage: React.FC = () => {
             if (amount <= BigInt(0)) {
               newErrors.amount = "Amount must be greater than 0";
             }
-          } else {
-            // For LP tokens, basic validation
-            const amount = parseFloat(formData.amount);
-            if (amount <= 0) {
+          } else if (selectedLockType === "univ2") {
+            // For LP tokens, use proper validation
+            const amount = parseUnits(
+              formData.amount,
+              lpTokenApproval.decimals
+            );
+            if (amount > lpTokenApproval.balance) {
+              newErrors.amount = "Amount exceeds your LP balance";
+            }
+            if (amount <= BigInt(0)) {
               newErrors.amount = "Amount must be greater than 0";
             }
           }
@@ -187,6 +221,13 @@ export const CreateLockPage: React.FC = () => {
       const nftId = parseInt(formData.nftId);
       if (isNaN(nftId) || nftId <= 0) {
         newErrors.nftId = "Invalid NFT ID";
+      } else if (selectedLockType === "univ3") {
+        // UniV3 specific validations
+        if (!uniV3NFT.isOwner && formData.nftId) {
+          newErrors.nftId = "You don't own this NFT";
+        } else if (!uniV3NFT.hasLiquidity && formData.nftId) {
+          newErrors.nftId = "This NFT position has no liquidity";
+        }
       }
     }
 
@@ -256,10 +297,24 @@ export const CreateLockPage: React.FC = () => {
   };
 
   const handleMaxClick = () => {
-    if (tokenApproval.balance && tokenApproval.decimals) {
+    if (
+      selectedLockType === "token" &&
+      tokenApproval.balance &&
+      tokenApproval.decimals
+    ) {
       const maxAmount = formatUnits(
         tokenApproval.balance,
         tokenApproval.decimals
+      );
+      handleInputChange("amount", maxAmount);
+    } else if (
+      selectedLockType === "univ2" &&
+      lpTokenApproval.balance &&
+      lpTokenApproval.decimals
+    ) {
+      const maxAmount = formatUnits(
+        lpTokenApproval.balance,
+        lpTokenApproval.decimals
       );
       handleInputChange("amount", maxAmount);
     }
@@ -276,14 +331,28 @@ export const CreateLockPage: React.FC = () => {
     }
 
     try {
-      await tokenApproval.approve(formData.amount);
+      if (selectedLockType === "token") {
+        await tokenApproval.approve(formData.amount);
+      } else if (selectedLockType === "univ2") {
+        await lpTokenApproval.approve(formData.amount);
+      } else if (selectedLockType === "univ3") {
+        await uniV3NFT.approve();
+      }
     } catch (error) {
       console.error("Approval failed:", error);
       setStatusModal({
         isOpen: true,
         type: "error",
         title: "Approval Failed",
-        message: "Failed to approve token spending. Please try again.",
+        message: `Failed to approve ${
+          selectedLockType === "token"
+            ? "token"
+            : selectedLockType === "univ2"
+            ? "LP token"
+            : "NFT"
+        } ${
+          selectedLockType === "univ3" ? "for spending" : "spending"
+        }. Please try again.`,
         details: error instanceof Error ? error.message : "Unknown error",
       });
     }
@@ -295,6 +364,20 @@ export const CreateLockPage: React.FC = () => {
       tokenApproval.refetchAllowance();
     }
   }, [tokenApproval.isConfirmed]);
+
+  // Watch for LP token approval confirmation
+  useEffect(() => {
+    if (lpTokenApproval.isConfirmed) {
+      lpTokenApproval.refetchAllowance();
+    }
+  }, [lpTokenApproval.isConfirmed]);
+
+  // Watch for UniV3 NFT approval confirmation
+  useEffect(() => {
+    if (uniV3NFT.isConfirmed) {
+      uniV3NFT.refetchApproval();
+    }
+  }, [uniV3NFT.isConfirmed]);
 
   // Watch for lock creation confirmation
   useEffect(() => {
@@ -337,6 +420,38 @@ export const CreateLockPage: React.FC = () => {
     }
   }, [tokenLocker.isConfirmed, selectedLockType, tokenLocker.hash]);
 
+  // Watch for UniV3 lock creation confirmation
+  useEffect(() => {
+    if (univ3LPLocker.isConfirmed) {
+      // Show success message
+      setStatusModal({
+        isOpen: true,
+        type: "success",
+        title: "UniV3 Lock Created Successfully!",
+        message: "UniV3 Liquidity lock has been created successfully.",
+        details: univ3LPLocker.hash
+          ? `Transaction Hash: ${univ3LPLocker.hash}`
+          : undefined,
+      });
+
+      // Reset form on success
+      setFormData({
+        chain: "Abstract",
+        tokenAddress: "",
+        lpAddress: "",
+        amount: "",
+        unlockTime: "",
+        tgeTime: "",
+        tgePercentage: "",
+        cycle: "",
+        cyclePercentage: "",
+        selectPool: "ReservoirV3",
+        nftId: "",
+      });
+      setSelectedFeeStructure("default");
+    }
+  }, [univ3LPLocker.isConfirmed, univ3LPLocker.hash]);
+
   // Watch for transaction errors
   useEffect(() => {
     if (tokenLocker.error) {
@@ -349,6 +464,19 @@ export const CreateLockPage: React.FC = () => {
       });
     }
   }, [tokenLocker.error]);
+
+  // Watch for UniV3 transaction errors
+  useEffect(() => {
+    if (univ3LPLocker.error) {
+      setStatusModal({
+        isOpen: true,
+        type: "error",
+        title: "UniV3 Transaction Failed",
+        message: "The UniV3 lock transaction failed. Please try again.",
+        details: univ3LPLocker.error.message || "Unknown error occurred",
+      });
+    }
+  }, [univ3LPLocker.error]);
 
   const handleCreateLock = async () => {
     try {
@@ -404,7 +532,7 @@ export const CreateLockPage: React.FC = () => {
             amount: formData.amount,
             unlockTime,
             feeType,
-            decimals: 18, // LP tokens typically use 18 decimals
+            decimals: lpTokenApproval.decimals,
             tgeTime,
             tgePercentage,
             cycle,
@@ -416,18 +544,25 @@ export const CreateLockPage: React.FC = () => {
             amount: formData.amount,
             unlockTime,
             feeType,
-            decimals: 18, // LP tokens typically use 18 decimals
+            decimals: lpTokenApproval.decimals,
           });
         }
       } else if (selectedLockType === "univ3") {
-        // UniV3 NFT Lock - For now, we'll treat it as a special token lock
-        // In a real implementation, this would call a different contract function
-        await tokenLocker.createNormalLock({
-          token: `0x${formData.nftId.padStart(40, "0")}` as Address, // Mock address from NFT ID
-          amount: "1", // NFTs are typically amount 1
+        // UniV3 NFT Lock using Univ3LPLocker contract
+        const nftManager = "0xfA928D3ABc512383b8E5E77edd2d5678696084F9"; // ReservoirV3 address
+        const feeName =
+          selectedFeeStructure === "lvp"
+            ? "LVP"
+            : selectedFeeStructure === "llp"
+            ? "LLP"
+            : "DEFAULT";
+
+        await univ3LPLocker.createLock({
+          nftManager: nftManager as Address,
+          nftId: formData.nftId,
+          collector: address as Address, // Use connected wallet as collector
           unlockTime,
-          feeType,
-          decimals: 0, // NFTs don't have decimals
+          feeName,
         });
       } else if (selectedLockType === "univ4") {
         // UniV4 NFT Lock - Similar to V3
@@ -509,13 +644,17 @@ export const CreateLockPage: React.FC = () => {
   };
 
   const needsApproval = () => {
-    // Only token locks need approval for now
     if (selectedLockType === "token") {
       if (!formData.amount || !tokenApproval.decimals) return false;
       return !tokenApproval.checkApproval(formData.amount);
+    } else if (selectedLockType === "univ2") {
+      if (!formData.amount || !lpTokenApproval.decimals) return false;
+      return !lpTokenApproval.checkApproval(formData.amount);
+    } else if (selectedLockType === "univ3") {
+      if (!formData.nftId) return false;
+      return !uniV3NFT.checkApproval;
     }
-    // LP locks, V3, and V4 locks would need their own approval logic
-    // For now, we'll assume they don't need approval or handle it differently
+    // V4 locks would need their own approval logic
     return false;
   };
 
@@ -861,6 +1000,27 @@ export const CreateLockPage: React.FC = () => {
                 {errors.lpAddress}
               </div>
             )}
+            {/* LP Token Info Display */}
+            {formData.lpAddress && isAddress(formData.lpAddress) && (
+              <div className="mt-2 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-400">LP Token Info:</span>
+                  <div className="text-right">
+                    <div className="text-white">
+                      {lpTokenApproval.name || "Unknown"} (
+                      {lpTokenApproval.symbol || "???"})
+                    </div>
+                    <div className="text-gray-400">
+                      Balance:{" "}
+                      {formatUnits(
+                        lpTokenApproval.balance,
+                        lpTokenApproval.decimals
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-gray-300 mb-1">Amount</label>
@@ -1143,13 +1303,18 @@ export const CreateLockPage: React.FC = () => {
             onClick={handleApprove}
             disabled={
               !isFormValid() ||
+              lpTokenApproval.isPending ||
               tokenLocker.isPending ||
               tokenLocker.isConfirming
             }>
-            {tokenLocker.isPending
+            {lpTokenApproval.isPending
+              ? "Approving LP..."
+              : tokenLocker.isPending
               ? "Creating Lock..."
               : tokenLocker.isConfirming
               ? "Confirming..."
+              : needsApproval()
+              ? "Approve LP Token"
               : "Create Lock"}
           </button>
         </form>
@@ -1344,13 +1509,18 @@ export const CreateLockPage: React.FC = () => {
             onClick={handleApprove}
             disabled={
               !isFormValid() ||
-              tokenLocker.isPending ||
-              tokenLocker.isConfirming
+              uniV3NFT.isPending ||
+              univ3LPLocker.isPending ||
+              univ3LPLocker.isConfirming
             }>
-            {tokenLocker.isPending
+            {uniV3NFT.isPending
+              ? "Approving NFT..."
+              : univ3LPLocker.isPending
               ? "Creating Lock..."
-              : tokenLocker.isConfirming
+              : univ3LPLocker.isConfirming
               ? "Confirming..."
+              : needsApproval()
+              ? "Approve NFT"
               : "Create Lock"}
           </button>
         </form>

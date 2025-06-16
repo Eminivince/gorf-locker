@@ -32,7 +32,7 @@ export const HowToUsePage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-            How to Use Gorf Locker
+            How to Use Gorf Token Locker
           </h1>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
             Learn how to securely lock your tokens and LP positions with our
@@ -115,7 +115,7 @@ const GettingStartedContent = () => (
             <div>
               <h4 className="font-semibold mb-2">Connect Your Wallet</h4>
               <p className="text-gray-400">
-                Connect a compatible wallet (MetaMask, WalletConnect, etc.) to
+                Connect a compatible wallet (Abstract Global Wallet, MetaMask, WalletConnect, etc.) to
                 the Abstract network.
               </p>
             </div>
@@ -293,6 +293,20 @@ const LPLocksContent = () => (
     </div>
 
     <div className="grid lg:grid-cols-3 gap-6">
+      <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 p-6 rounded-xl">
+        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <div className="w-fit p-2 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+            ERC20
+          </div>
+          Tokens
+        </h3>
+        <ul className="space-y-2 text-gray-300 text-sm">
+          <li>• General ERC20 tokens</li>
+          <li>• Supports TGE Vesting Locks</li>
+          <li>• Supports Standard Locks</li>
+          <li>• Multiple fee payment options</li>
+        </ul>
+      </div>
       <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 p-6 rounded-xl">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
@@ -320,21 +334,6 @@ const LPLocksContent = () => (
           <li>• Continue earning fees while locked</li>
           <li>• Collect liquidity stake earnings</li>
           <li>• Advanced fee structures</li>
-        </ul>
-      </div>
-
-      <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 p-6 rounded-xl">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-            V4
-          </div>
-          UniswapV4 Locks
-        </h3>
-        <ul className="space-y-2 text-gray-300 text-sm">
-          <li>• Latest Uniswap technology</li>
-          <li>• Enhanced earning potential</li>
-          <li>• Optimized fee structures</li>
-          <li>• Future-proof locking</li>
         </ul>
       </div>
     </div>
@@ -411,7 +410,7 @@ const FeesContent = () => (
     </div>
 
     <div className="bg-gray-700/30 p-6 rounded-xl">
-      <h3 className="text-xl font-semibold mb-4">V3/V4 Advanced Fees</h3>
+      <h3 className="text-xl font-semibold mb-4">V3 Advanced Fees</h3>
       <div className="grid md:grid-cols-3 gap-4">
         <div className="text-center p-4 bg-gray-600/30 rounded-lg">
           <h4 className="font-semibold mb-2">Default</h4>
@@ -535,8 +534,8 @@ const SecurityContent = () => (
           transactions
         </li>
         <li>
-          • <strong>Smart Contract Risk:</strong> While audited, smart contracts
-          carry inherent risks
+          • <strong>Smart Contract Risk:</strong> Even when audited, smart contracts
+          carry inherent risks.
         </li>
       </ul>
     </div>

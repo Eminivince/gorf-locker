@@ -4,11 +4,10 @@ import { Lock, Plus, TrendingUp, Users, Clock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { useTokenLocker } from "../hooks/useTokenLocker";
 import { useAllLocks } from "../hooks/useAllLocks";
+import { useUniv3AllLocks } from "../hooks/useUniv3UserLocks";
 import { useEnhancedStatistics } from "../hooks/useEnhancedStatistics";
 import { LockTable } from "../components/LockTable";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-
-import { FEE_NAME_HASHES } from "../utils/ComputeNameHash";
 
 // Mock data for the chart
 const chartData = [
@@ -45,6 +44,10 @@ export const HomePage = () => {
     totalLocks: allLocksCount,
     isLoading,
   } = useAllLocks();
+
+  // Add UniV3 locks fetching
+  const { allLocks: univ3Locks } = useUniv3AllLocks();
+
   const {
     totalLocks: statisticsTotalLocks,
     uniqueTokensLocked,
@@ -59,7 +62,25 @@ export const HomePage = () => {
       case "V2 Pools":
         return v2Pools;
       case "V3 Pools":
-        return v3Pools;
+        return v3Pools; // Keep using categorized V3 locks for now
+      case "UniV3 NFTs":
+        // Convert UniV3 locks to compatible format for LockTable
+        return univ3Locks.map((lock) => ({
+          lockId: lock.lockId,
+          token: lock.pool, // Use pool address as token
+          isLpToken: true,
+          pendingOwner: lock.pendingOwner,
+          owner: lock.owner,
+          amount: lock.nftId, // Use NFT ID as amount for display
+          startTime: lock.startTime,
+          endTime: lock.endTime,
+          cycle: 0,
+          tgeBps: 0,
+          cycleBps: 0,
+          unlockedAmount: "0",
+          feeNameHash:
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+        }));
       case "V4 Pools":
         return v4Pools;
       default:
@@ -75,6 +96,8 @@ export const HomePage = () => {
         return "v2";
       case "V3 Pools":
         return "v3";
+      case "UniV3 NFTs":
+        return "v3"; // Use v3 type for UniV3 NFTs
       case "V4 Pools":
         return "v4";
       default:
@@ -89,7 +112,9 @@ export const HomePage = () => {
       case "V2 Pools":
         return v2Pools.length;
       case "V3 Pools":
-        return v3Pools.length;
+        return v3Pools.length; // Keep using categorized V3 locks count
+      case "UniV3 NFTs":
+        return univ3Locks.length;
       case "V4 Pools":
         return v4Pools.length;
       default:
@@ -105,7 +130,7 @@ export const HomePage = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <div className="space-y-4">
+              <div className="space-y-4 text-center lg:text-left">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                   Gorf Token Locker{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
@@ -116,11 +141,10 @@ export const HomePage = () => {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
                     Abstract.
                   </span>{" "}
-              
                 </h1>
                 <p className="text-xl text-gray-300 max-w-2xl">
-                  Secure your tokens with battle-tested smart contracts.
-                  Trusted by thousands of projects for reliable token vesting.
+                  Secure your tokens with battle-tested smart contracts. Trusted
+                  by thousands of projects for reliable token vesting.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -253,9 +277,7 @@ export const HomePage = () => {
             <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
               <div className="flex items-center space-x-3 mb-6">
                 <TrendingUp className="w-6 h-6 text-green-400" />
-                <h3 className="text-xl font-semibold text-white">
-                  Locks Growth
-                </h3>
+                <h3 className="text-xl font-semibold text-white">Locks</h3>
               </div>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -289,7 +311,7 @@ export const HomePage = () => {
             {/* Tabs and Network Selector */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
               <div className="flex flex-wrap gap-2">
-                {["Tokens", "V2 Pools", "V3 Pools", "V4 Pools"].map((tab) => (
+                {["Tokens", "V2 Pools", "UniV3 NFTs"].map((tab) => (
                   <button
                     key={tab}
                     className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
@@ -305,11 +327,6 @@ export const HomePage = () => {
                   </button>
                 ))}
               </div>
-
-              <div className="flex items-center space-x-3 bg-gray-800 px-4 py-2 rounded-xl border border-gray-700">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-white font-medium">Abstract</span>
-              </div>
             </div>
 
             {/* Lock Table */}
@@ -323,6 +340,18 @@ export const HomePage = () => {
                 <LockTable
                   locks={getCurrentTabLocks()}
                   type={getCurrentTabType()}
+                  isUniV3NFT={activeTab === "UniV3 NFTs"}
+                  uniV3Data={
+                    activeTab === "UniV3 NFTs"
+                      ? univ3Locks.map((lock) => ({
+                          nftPositionManager: lock.nftPositionManager,
+                          nftId: lock.nftId,
+                        }))
+                      : undefined
+                  }
+                  originalUniv3Locks={
+                    activeTab === "UniV3 NFTs" ? univ3Locks : undefined
+                  }
                 />
               )}
             </div>

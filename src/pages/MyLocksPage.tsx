@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAccount } from "wagmi";
 import { useTokenLocker } from "../hooks/useTokenLocker";
+import { useUniv3UserLocks } from "../hooks/useUniv3UserLocks";
+import { useUniv3LPLocker } from "../hooks/useUniv3LPLocker";
 import { formatUnits } from "viem";
-import { Lock, Clock, Unlock } from "lucide-react";
+import { Lock, Clock, Unlock, RefreshCw } from "lucide-react";
 import { LockDetailModal } from "../components/LockDetailModal";
+import { Univ3LockDetailModal } from "../components/Univ3LockDetailModal";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { StatusModal } from "../components/StatusModal";
 import type { LockInfo } from "../hooks/useTokenLocker";
+import type { Univ3LockInfo } from "../hooks/useUniv3UserLocks";
 import "./MyLocksPage.css";
 
 export const MyLocksPage = () => {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const {
     userNormalLocks,
     userLpLocks,
@@ -20,9 +24,21 @@ export const MyLocksPage = () => {
     refreshLockData,
   } = useTokenLocker();
 
-  const [selectedLock, setSelectedLock] = useState<LockInfo | null>(null);
+  // UniV3 locks
+  const { userLocks: univ3Locks, refetchUserLocks: refetchUniv3Locks } =
+    useUniv3UserLocks();
+  const {
+    unlockNFT,
+    isPending: isUniv3Pending,
+    isConfirmed: isUniv3Confirmed,
+  } = useUniv3LPLocker();
+
+  const [selectedLock, setSelectedLock] = useState<
+    LockInfo | Univ3LockInfo | null
+  >(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [unlockingLockId, setUnlockingLockId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusModal, setStatusModal] = useState<{
     isOpen: boolean;
     type: "success" | "error" | "warning";
@@ -39,15 +55,46 @@ export const MyLocksPage = () => {
   // Add a ref to track if unlock success has been handled
   const unlockHandledRef = useRef(false);
 
+  // Create a mapping to track which contract each lock belongs to
+  const lockContractMap = new Map<string, "token" | "lp" | "univ3">();
+
+  // Add prefixes to lockIds to avoid collisions and track contract types
+  const prefixedUserNormalLocks = userNormalLocks.map((lock) => {
+    const prefixedId = `token-${lock.lockId}`;
+    lockContractMap.set(prefixedId, "token");
+    return { ...lock, lockId: prefixedId };
+  });
+
+  const prefixedUserLpLocks = userLpLocks.map((lock) => {
+    const prefixedId = `lp-${lock.lockId}`;
+    lockContractMap.set(prefixedId, "lp");
+    return { ...lock, lockId: prefixedId };
+  });
+
+  const prefixedUniv3Locks = univ3Locks.map((lock) => {
+    const prefixedId = `univ3-${lock.lockId}`;
+    lockContractMap.set(prefixedId, "univ3");
+    return { ...lock, lockId: prefixedId };
+  });
+
   // Define allLocks early so it can be used in useCallback dependencies
-  const allLocks = [...userNormalLocks, ...userLpLocks];
+  const allLocks = [
+    ...prefixedUserNormalLocks,
+    ...prefixedUserLpLocks,
+    ...prefixedUniv3Locks,
+  ];
 
   // Effect to refresh data when transaction is confirmed
   useEffect(() => {
-    if (isConfirmed && !unlockHandledRef.current) {
+    if ((isConfirmed || isUniv3Confirmed) && !unlockHandledRef.current) {
       unlockHandledRef.current = true; // Mark as handled to prevent recursion
 
-      refreshLockData();
+      // Refresh both TokenLocker and UniV3 data with a small delay to ensure blockchain state is updated
+      console.log("🔄 Refreshing lock data after successful unlock...");
+      setTimeout(() => {
+        refreshLockData();
+        refetchUniv3Locks();
+      }, 1000); // 1 second delay to ensure blockchain state is updated
       setUnlockingLockId(null); // Clear unlocking state
 
       // Show success message
@@ -55,7 +102,9 @@ export const MyLocksPage = () => {
         isOpen: true,
         type: "success",
         title: "Unlock Successful!",
-        message: "Your tokens have been unlocked successfully.",
+        message: isUniv3Confirmed
+          ? "Your UniV3 NFT has been unlocked successfully."
+          : "Your tokens have been unlocked successfully.",
       });
 
       // Close modal if it's open
@@ -64,7 +113,13 @@ export const MyLocksPage = () => {
         setSelectedLock(null);
       }
     }
-  }, [isConfirmed, refreshLockData, isModalOpen]);
+  }, [
+    isConfirmed,
+    isUniv3Confirmed,
+    refreshLockData,
+    refetchUniv3Locks,
+    isModalOpen,
+  ]);
 
   const formatAddress = (addr: string | undefined | null) => {
     if (!addr || typeof addr !== "string") return "N/A";
@@ -80,7 +135,10 @@ export const MyLocksPage = () => {
   };
 
   const handleUnlock = async (lockId: string) => {
+    console.log("handleUnlock", lockId);
+    console.log("allLocks", allLocks);
     try {
+      console.log("unlockHandledRef", unlockHandledRef.current);
       unlockHandledRef.current = false; // Reset flag for new unlock
       setUnlockingLockId(lockId); // Set loading state for this specific lock
 
@@ -112,7 +170,21 @@ export const MyLocksPage = () => {
         return;
       }
 
-      await unlockTokens(lockId);
+      console.log("lock", lock);
+
+      // Extract original lockId and determine contract type
+      const originalLockId = lockId.split("-")[1]; // Remove prefix (token-, lp-, univ3-)
+      const contractType = lockContractMap.get(lockId);
+
+      console.log("originalLockId", originalLockId);
+      console.log("contractType", contractType);
+
+      if (contractType === "univ3") {
+        await unlockNFT(originalLockId);
+      } else {
+        // Both token and lp locks use the same TokenLocker contract
+        await unlockTokens(originalLockId);
+      }
 
       // Note: unlockingLockId will be cleared when transaction is confirmed
     } catch (error) {
@@ -121,7 +193,7 @@ export const MyLocksPage = () => {
       unlockHandledRef.current = false; // Reset flag on error
 
       // Show user-friendly error message
-      let errorMessage = "Failed to unlock tokens";
+      let errorMessage = "Failed to unlock";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
@@ -129,13 +201,13 @@ export const MyLocksPage = () => {
         isOpen: true,
         type: "error",
         title: "Unlock Failed",
-        message: "Failed to unlock tokens. Please try again.",
+        message: "Failed to unlock. Please try again.",
         details: errorMessage,
       });
     }
   };
 
-  const handleLockClick = (lock: LockInfo) => {
+  const handleLockClick = (lock: LockInfo | Univ3LockInfo) => {
     setSelectedLock(lock);
     setIsModalOpen(true);
   };
@@ -147,6 +219,18 @@ export const MyLocksPage = () => {
 
   const handleModalUnlock = async (lockId: string) => {
     await handleUnlock(lockId);
+  };
+
+  const handleManualRefresh = async () => {
+    console.log("🔄 Manual refresh triggered...");
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refreshLockData(), refetchUniv3Locks()]);
+    } catch (error) {
+      console.error("Refresh failed:", error);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500); // Small delay for visual feedback
+    }
   };
 
   if (!isConnected) {
@@ -167,6 +251,14 @@ export const MyLocksPage = () => {
     <div className="my-locks-page">
       <div className="page-header">
         <h1>My Locks</h1>
+        <button
+          className={`refresh-btn ${isRefreshing ? "refreshing" : ""}`}
+          onClick={handleManualRefresh}
+          disabled={isRefreshing}
+          title="Refresh locks data">
+          <RefreshCw size={20} className={isRefreshing ? "spinning" : ""} />
+          {isRefreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
 
       <div className="locks-stats">
@@ -186,6 +278,15 @@ export const MyLocksPage = () => {
           <div className="stat-content">
             <div className="stat-value">{userLpLocks.length}</div>
             <div className="stat-label">LP Locks</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">
+            <div className="nft-icon">V3</div>
+          </div>
+          <div className="stat-content">
+            <div className="stat-value">{univ3Locks.length}</div>
+            <div className="stat-label">UniV3 Locks</div>
           </div>
         </div>
         <div className="stat-card">
@@ -233,13 +334,19 @@ export const MyLocksPage = () => {
               onClick={() => handleLockClick(lock)}>
               <div className="lock-header">
                 <div className="lock-type">
-                  {lock.isLpToken ? (
+                  {"nftId" in lock ? (
+                    <div className="v3-badge">V3</div>
+                  ) : (lock as LockInfo).isLpToken ? (
                     <div className="lp-badge">LP</div>
                   ) : (
                     <Lock size={20} />
                   )}
                   <span>
-                    {lock.isLpToken ? "Liquidity Lock" : "Token Lock"}
+                    {"nftId" in lock
+                      ? "UniV3 NFT Lock"
+                      : (lock as LockInfo).isLpToken
+                      ? "Liquidity Lock"
+                      : "Token Lock"}
                   </span>
                 </div>
                 <div
@@ -256,32 +363,63 @@ export const MyLocksPage = () => {
                     <span className="label">Lock ID:</span>
                     <span className="value">{lock.lockId}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="label">Token:</span>
-                    <span className="value">{formatAddress(lock.token)}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Amount:</span>
-                    <span className="value">
-                      {formatUnits(BigInt(lock.amount), 18)}
-                    </span>
-                  </div>
+                  {"nftId" in lock ? (
+                    // UniV3 NFT Lock info
+                    <>
+                      <div className="info-row">
+                        <span className="label">NFT ID:</span>
+                        <span className="value">{lock.nftId}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">Pool:</span>
+                        <span className="value">
+                          {formatAddress(lock.pool)}
+                        </span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">Collector:</span>
+                        <span className="value">
+                          {formatAddress(lock.collector)}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    // Regular token/LP lock info
+                    <>
+                      <div className="info-row">
+                        <span className="label">Token:</span>
+                        <span className="value">
+                          {formatAddress((lock as LockInfo).token)}
+                        </span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">Amount:</span>
+                        <span className="value">
+                          {formatUnits(BigInt((lock as LockInfo).amount), 18)}
+                        </span>
+                      </div>
+                      {(lock as LockInfo).tgeBps > 0 && (
+                        <>
+                          <div className="info-row">
+                            <span className="label">TGE:</span>
+                            <span className="value">
+                              {(lock as LockInfo).tgeBps / 100}%
+                            </span>
+                          </div>
+                          <div className="info-row">
+                            <span className="label">Cycle:</span>
+                            <span className="value">
+                              {(lock as LockInfo).cycleBps / 100}%
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
                   <div className="info-row">
                     <span className="label">Unlock Time:</span>
                     <span className="value">{formatDate(lock.endTime)}</span>
                   </div>
-                  {lock.tgeBps > 0 && (
-                    <>
-                      <div className="info-row">
-                        <span className="label">TGE:</span>
-                        <span className="value">{lock.tgeBps / 100}%</span>
-                      </div>
-                      <div className="info-row">
-                        <span className="label">Cycle:</span>
-                        <span className="value">{lock.cycleBps / 100}%</span>
-                      </div>
-                    </>
-                  )}
                 </div>
 
                 <div className="lock-actions">
@@ -300,7 +438,11 @@ export const MyLocksPage = () => {
                         e.stopPropagation();
                         handleUnlock(lock.lockId);
                       }}
-                      disabled={isPending || unlockingLockId === lock.lockId}>
+                      disabled={
+                        isPending ||
+                        isUniv3Pending ||
+                        unlockingLockId === lock.lockId
+                      }>
                       {unlockingLockId === lock.lockId
                         ? "Unlocking..."
                         : "Unlock"}
@@ -313,16 +455,37 @@ export const MyLocksPage = () => {
         </div>
       )}
 
-      {/* Lock Detail Modal */}
-      {selectedLock && (
+      {/* Lock Detail Modals */}
+      {selectedLock && !("nftId" in selectedLock) && (
         <LockDetailModal
-          lock={selectedLock}
+          lock={selectedLock as LockInfo}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onUnlock={async (lockId: string) => {
             await handleModalUnlock(lockId);
           }}
-          isPending={isPending || unlockingLockId === selectedLock?.lockId}
+          isPending={
+            isPending ||
+            isUniv3Pending ||
+            unlockingLockId === selectedLock?.lockId
+          }
+        />
+      )}
+
+      {/* UniV3 NFT Lock Detail Modal */}
+      {selectedLock && "nftId" in selectedLock && (
+        <Univ3LockDetailModal
+          lock={selectedLock as Univ3LockInfo}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onUnlock={async (lockId: string) => {
+            await handleModalUnlock(lockId);
+          }}
+          isPending={
+            isPending ||
+            isUniv3Pending ||
+            unlockingLockId === selectedLock?.lockId
+          }
         />
       )}
 

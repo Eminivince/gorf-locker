@@ -127,7 +127,7 @@ export const ConnectWalletButton = () => {
                 setShowDropdown(false);
               }}
               disabled={isPending}>
-              Connect with Abstract Wallet
+              Connect with Abstract Global Wallet
             </button>
           ) : (
             // Standard Wallet Mode

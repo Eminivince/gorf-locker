@@ -2,20 +2,41 @@ import React from "react";
 import { formatUnits } from "viem";
 import { ExternalLink, Eye } from "lucide-react";
 import type { LockInfo } from "../hooks/useTokenLocker";
-import { useTokenInfo } from "../hooks/useTokenInfo";
+import {
+  useTokenInfo,
+  useUniV2PairInfo,
+  useUniV3PositionInfo,
+} from "../hooks/useTokenInfo";
 
 interface LockTableRowProps {
   lock: LockInfo;
   type: "tokens" | "v2" | "v3" | "v4";
   onLockClick: (lock: LockInfo) => void;
+  isUniV3NFT?: boolean; // Flag to identify UniV3 NFT locks
+  nftPositionManager?: string; // Position manager address for UniV3 NFTs
 }
 
 export const LockTableRow: React.FC<LockTableRowProps> = ({
   lock,
   type,
   onLockClick,
+  isUniV3NFT = false,
+  nftPositionManager,
 }) => {
   const tokenInfo = useTokenInfo(lock.token);
+
+  // For UniV2 LP tokens, get pair information
+  const uniV2PairInfo = useUniV2PairInfo(
+    type === "v2" ? lock.token : undefined
+  );
+
+  // For UniV3 NFT locks, get position information
+  const uniV3PositionInfo = useUniV3PositionInfo(
+    isUniV3NFT && nftPositionManager
+      ? (nftPositionManager as `0x${string}`)
+      : undefined,
+    isUniV3NFT ? lock.amount : undefined // amount contains NFT ID for UniV3 locks
+  );
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -31,14 +52,14 @@ export const LockTableRow: React.FC<LockTableRowProps> = ({
       const num = parseFloat(formatted);
 
       if (num >= 1000000) {
-        return `${(num / 1000000).toFixed(2)}M`;
+        return isUniV3NFT ? "1" : `${(num / 1000000).toFixed(2)}M`;
       } else if (num >= 1000) {
-        return `${(num / 1000).toFixed(2)}K`;
+        return isUniV3NFT ? "1" : `${(num / 1000).toFixed(2)}K`;
       } else {
-        return num.toFixed(4);
+        return isUniV3NFT ? "1" : num.toFixed(4);
       }
     } catch {
-      return "0";
+      return isUniV3NFT ? "1" : "0";
     }
   };
 
@@ -84,28 +105,50 @@ export const LockTableRow: React.FC<LockTableRowProps> = ({
 
   // Get display name for token/pool
   const getDisplayName = () => {
-    if (tokenInfo.isLoading) {
-      return "Loading...";
+    // Handle UniV3 NFT locks
+    if (isUniV3NFT) {
+      if (uniV3PositionInfo.isLoading) {
+        return "Loading NFT Position...";
+      }
+      return uniV3PositionInfo.pairName !== "Unknown Pair"
+        ? uniV3PositionInfo.pairName
+        : `UniV3 NFT #${lock.amount}`;
     }
 
+    // Handle UniV2 LP tokens
+    if (type === "v2") {
+      if (uniV2PairInfo.isLoading) {
+        return "Loading Pair...";
+      }
+      return uniV2PairInfo.pairName !== "Unknown Pair"
+        ? uniV2PairInfo.pairName
+        : `V2 Pool`;
+    }
+
+    // Handle regular tokens
     if (type === "tokens") {
+      if (tokenInfo.isLoading) {
+        return "Loading...";
+      }
       return tokenInfo.name !== "Unknown Token"
         ? tokenInfo.name
         : tokenInfo.symbol;
-    } else {
-      // For LP tokens, we'll show the symbol or a generic pool name
-      // In a real implementation, you might want to decode the LP token to get pair info
-      return tokenInfo.symbol !== "UNKNOWN"
-        ? `${tokenInfo.symbol} Pool`
-        : `${getTypeLabel()} Pool`;
     }
+
+    // Handle other LP tokens (V3 pools from categorized locks, V4, etc.)
+    if (tokenInfo.isLoading) {
+      return "Loading...";
+    }
+    return tokenInfo.symbol !== "UNKNOWN"
+      ? `${tokenInfo.symbol} Pool`
+      : `${getTypeLabel()} Pool`;
   };
 
   const getDisplaySymbol = () => {
     if (tokenInfo.isLoading) {
       return "...";
     }
-    return tokenInfo.symbol;
+    return isUniV3NFT ? "v3 NFT" : tokenInfo.symbol;
   };
 
   return (
@@ -139,7 +182,8 @@ export const LockTableRow: React.FC<LockTableRowProps> = ({
             />
           </div>
           <span className="percentage-text">
-            {getLockedPercentageAgainstSupply().toFixed(2)}%
+            {isUniV3NFT ? "" : getLockedPercentageAgainstSupply().toFixed(2)}
+            {isUniV3NFT ? "" : "%"}
           </span>
         </div>
       </div>

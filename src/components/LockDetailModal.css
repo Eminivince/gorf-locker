@@ -57,6 +57,12 @@
   color: #000;
 }
 
+.lock-icon .v3-badge {
+  font-weight: bold;
+  font-size: 14px;
+  color: #000;
+}
+
 .modal-title h2 {
   margin: 0;
   color: #fff;
@@ -231,6 +237,11 @@
   font-size: 18px !important;
 }
 
+.value.unlockable {
+  color: #00ff88;
+  font-weight: 600;
+}
+
 .value-with-copy {
   display: flex;
   align-items: center;
@@ -259,7 +270,8 @@
 }
 
 /* Action Buttons */
-.action-buttons {
+.action-buttons,
+.modal-actions {
   display: flex;
   gap: 16px;
   margin-top: 32px;
@@ -294,7 +306,22 @@
   cursor: not-allowed;
 }
 
+.secondary-btn {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.secondary-btn:hover {
+  background: #444;
+  border-color: #666;
+}
 
 .explorer-btn:hover {
   background: #444;
